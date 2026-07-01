@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Risk Disclosure Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+#lock-screen{position:fixed;inset:0;z-index:100000;background:#F5F2EC;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+.lock-box{background:#fff;border:1px solid #E3DED4;border-radius:12px;padding:34px 30px;width:330px;max-width:90vw;box-shadow:0 8px 40px rgba(0,0,0,0.10);text-align:center;}
+.lock-title{font-size:19px;font-weight:600;letter-spacing:-0.01em;color:#1A1A1A;}
+.lock-sub{font-size:13px;color:#6b6b66;margin:6px 0 20px;}
+.lock-input{width:100%;box-sizing:border-box;padding:11px 13px;font-size:14px;border:1px solid #D6D0C6;border-radius:8px;background:#fff;outline:none;}
+.lock-input:focus{border-color:var(--red,#A32035);}
+.lock-btn{width:100%;margin-top:12px;padding:11px;font-size:14px;font-weight:600;color:#fff;background:var(--red,#A32035);border:none;border-radius:8px;cursor:pointer;}
+.lock-btn:hover{filter:brightness(1.06);}
+.lock-btn:disabled{opacity:0.6;cursor:default;}
+.lock-err{min-height:16px;margin-top:12px;font-size:12.5px;color:var(--red,#A32035);}
+:root{--red:#A32035;--red-dark:#5E0E20;--red-pale:#E8C4CB;--amber:#E8A317;--amber-deep:#B97D08;--green:#2E8B57;--ink:#1A1A1A;--muted:#898A8D;--line:#E8E8E6;--bg:#FAFAFA;--card:#FFFFFF;--empty:#ECECEA;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;}
+.page{max-width:2100px;margin:0 auto;padding:18px 28px 48px;}
+.header{background:#1A1A1A;text-align:center;width:100vw;margin-left:calc(50% - 50vw);padding:18px calc(50vw - 50%);margin-bottom:18px;}
+.header h1{color:#fff;font-size:20px;font-weight:600;letter-spacing:-0.01em;}
+.header-sub{color:rgba(255,255,255,0.85);font-size:16px;line-height:1.5;font-weight:400;max-width:880px;margin:10px auto 0;}
+.brand{display:flex;align-items:center;gap:12px;flex:1;}
+.brand-mark{width:18px;height:18px;background:var(--red);position:relative;}
+.brand-mark::before{content:'';position:absolute;width:6px;height:18px;left:6px;top:0;background:var(--card);}
+.brand-mark::after{content:'';position:absolute;width:18px;height:6px;left:0;top:6px;background:var(--card);}
+.brand-text{font-size:13px;font-weight:600;}
+.brand-text span{color:var(--muted);font-weight:400;}
+.title-block{flex:1;text-align:left;}
+.sitebar{display:flex;align-items:center;justify-content:space-between;gap:14px 24px;flex-wrap:wrap;width:100vw;margin-left:calc(50% - 50vw);padding:14px calc(50vw - 50%) 13px;margin-bottom:0;border-bottom:3px solid var(--red);}
+.sitebar-logo{display:inline-flex;align-items:center;}
+.sitebar-logo img{height:30px;display:block;}
+.sitenav{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;}
+.sitenav a{font-size:13px;color:var(--red);text-decoration:none;font-weight:700;white-space:nowrap;}
+.sitenav a:hover{color:var(--red-dark);}
+.title-block h1{font-size:18px;font-weight:600;letter-spacing:-0.01em;}
+.title-block p{font-size:12px;color:var(--muted);margin-top:2px;}
+.right-meta{flex:1;text-align:right;font-size:12px;color:var(--muted);}
+.right-meta strong{color:var(--ink);font-weight:500;}
+.framing{font-size:15px;line-height:1.5;max-width:860px;margin:0 0 20px;}
+.framing p{margin:0 0 12px;}
+.framing p:last-child{margin-bottom:0;}
+.framing b{color:var(--red);font-weight:600;}
+.framing .am{color:var(--amber-deep);font-weight:600;}
+.framing-note{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5;}
+.framing-note b{color:var(--ink);font-weight:600;}
+.layout{display:grid;grid-template-columns:184px minmax(0,1fr) 250px;gap:16px;align-items:start;}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px;}
+.panel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:12px;}
+.filter-group{margin-bottom:18px;}
+.filter-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+.filter-select{width:100%;padding:7px 10px;font-size:13px;font-family:inherit;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23898A8D' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.center{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:22px;overflow-x:auto;min-height:480px;}
+.center-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.center-header h2{font-size:19px;font-weight:600;letter-spacing:-0.01em;}
+.tabs{display:flex;gap:6px;}
+.chip{font-size:13px;padding:7px 16px;background:var(--bg);border:1px solid var(--line);border-radius:16px;cursor:pointer;transition:all 0.12s;}
+.chip:hover{border-color:var(--muted);}
+.chip.active{background:var(--ink);color:white;border-color:var(--ink);}
+.legend{display:flex;gap:16px;align-items:center;font-size:11px;color:var(--muted);margin-bottom:16px;flex-wrap:wrap;}
+.axis-cue{display:flex;align-items:center;margin-bottom:10px;}
+.axis-spacer{width:158px;flex-shrink:0;}
+.axis-arrow{font-size:11px;color:var(--muted);font-style:italic;}
+.tip{border-bottom:1px dotted var(--muted);cursor:help;position:relative;font-style:normal;}
+.tip:hover::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 6px);width:240px;background:var(--ink);color:#fff;font-size:11px;line-height:1.4;font-style:normal;font-weight:400;letter-spacing:0;text-transform:none;padding:9px 11px;border-radius:5px;z-index:50;white-space:normal;box-shadow:0 4px 14px rgba(0,0,0,0.18);}
+.tip:hover::before{content:'';position:absolute;left:14px;top:calc(100% + 1px);border:5px solid transparent;border-bottom-color:var(--ink);z-index:51;}
+.intro-overlay{position:fixed;inset:0;background:rgba(26,26,26,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px;}
+.chooser{position:fixed;inset:0;background:rgba(26,26,26,0.45);display:flex;align-items:center;justify-content:center;z-index:150;padding:24px;}
+.chooser-card{background:var(--card);border-radius:10px;max-width:460px;width:100%;padding:28px 30px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.chooser-title{font-size:19px;font-weight:600;margin-bottom:6px;}
+.chooser-sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.chooser-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.chooser-opt{border:1px solid var(--line);border-radius:7px;padding:12px 14px;cursor:pointer;transition:border-color 0.12s,background 0.12s;}
+.chooser-opt:hover{border-color:var(--ink);background:var(--bg);}
+.chooser-opt-name{font-size:14px;font-weight:600;}
+.chooser-opt-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+.chooser-close{background:none;border:none;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 0;}
+.chooser-close:hover{color:var(--ink);}
+.tour{position:fixed;inset:0;z-index:200;pointer-events:none;}
+.tour-spot{position:absolute;border-radius:8px;box-shadow:0 0 0 9999px rgba(26,26,26,0.55);transition:all 0.35s cubic-bezier(.4,0,.2,1);pointer-events:none;border:2px solid #fff;}
+.tour-card{position:absolute;width:300px;background:var(--card);border-radius:10px;padding:18px 20px;box-shadow:0 14px 44px rgba(0,0,0,0.3);pointer-events:auto;transition:top 0.35s cubic-bezier(.4,0,.2,1),left 0.35s cubic-bezier(.4,0,.2,1);}
+.tour-step-n{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px;}
+.tour-title{font-size:16px;font-weight:600;margin-bottom:7px;}
+.tour-body{font-size:13px;line-height:1.5;color:var(--ink);margin-bottom:16px;}
+.tour-body b{color:var(--red);font-weight:600;}
+.tour-nav{display:flex;align-items:center;justify-content:space-between;}
+.tour-nav-r{display:flex;gap:8px;}
+.tour-skip{background:none;border:none;font-family:inherit;font-size:12px;color:var(--muted);cursor:pointer;padding:6px 0;}
+.tour-skip:hover{color:var(--ink);}
+.tour-btn{padding:7px 14px;font-family:inherit;font-size:12px;font-weight:500;border-radius:5px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;}
+.tour-btn:hover{border-color:var(--muted);}
+.tour-btn.primary{background:var(--ink);color:#fff;border-color:var(--ink);}
+.tour-btn.primary:hover{background:var(--red);border-color:var(--red);}
+.tour-btn:disabled{opacity:0.4;cursor:default;}
+.intro-card{background:var(--card);border-radius:10px;max-width:520px;width:100%;padding:30px 32px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.intro-title{font-size:20px;font-weight:600;margin-bottom:12px;}
+.intro-body{font-size:14px;line-height:1.55;color:var(--ink);margin-bottom:18px;}
+.intro-body b{color:var(--red);}
+.intro-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
+.intro-step{font-size:13px;display:flex;align-items:center;gap:10px;color:var(--ink);}
+.intro-step b{font-weight:600;}
+.intro-dot{width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.intro-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.intro-hint{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px;}
+.intro-body p{margin:0;}
+.intro-body p+p{margin-top:10px;}
+.intro-logo{height:30px;display:block;margin-bottom:18px;}
+.intro-btn{padding:9px 18px;font-family:inherit;font-size:13px;font-weight:500;border-radius:5px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;}
+.intro-btn:hover{border-color:var(--muted);}
+.intro-btn.primary{background:var(--ink);color:#fff;border-color:var(--ink);}
+.intro-btn.primary:hover{background:var(--red);border-color:var(--red);}
+.guide-wrap{max-width:none;}
+.guide-lead{font-size:16.5px;line-height:1.6;margin-bottom:6px;color:var(--ink);max-width:820px;}
+.guide-tour-btn{display:inline-block;margin-left:6px;padding:6px 14px;font-family:inherit;font-size:13px;font-weight:500;border-radius:5px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;vertical-align:middle;}
+.guide-tour-btn:hover{background:var(--red);border-color:var(--red);}
+.guide-tour-row{margin:18px 0 32px;}
+
+.page-hero{margin:0 -22px 20px;padding:15px 22px;background:var(--red);color:#fff;font-size:22px;font-weight:600;letter-spacing:-0.01em;}
+.cp-block>.guide-sec-title:first-child{border-top:none;padding-top:0;margin-top:0;}
+.guide-sec-title{font-size:17px;font-weight:700;letter-spacing:-0.01em;color:var(--ink);margin:30px 0 12px;padding-top:22px;border-top:1px solid var(--line);}
+.guide-body{font-size:14px;line-height:1.6;margin-bottom:12px;color:#333;max-width:760px;}
+.guide-body b{color:var(--ink);font-weight:600;}
+.guide-concepts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 6px;align-items:stretch;max-width:760px;}
+.about-tbl{width:100%;max-width:760px;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:10px 0 2px;font-size:13px;}
+.about-tbl th{text-align:left;vertical-align:top;width:210px;padding:12px 14px;font-weight:700;color:var(--ink);background:#fff;border-bottom:1px solid var(--line);border-right:1px solid var(--line);}
+.about-tbl td{vertical-align:top;padding:12px 14px;color:#444;line-height:1.5;background:#fff;border-bottom:1px solid var(--line);}
+.about-tbl tr:last-child th,.about-tbl tr:last-child td{border-bottom:none;}
+.gc{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.gc-band{font-size:12.5px;font-weight:700;padding:10px 12px;text-align:center;}
+.gc-band.gc-sig{background:var(--ink);color:#fff;}
+.gc-def{font-size:12px;line-height:1.45;color:#444;padding:11px 12px;}
+.gc-def b{color:var(--ink);font-weight:600;}
+.gc-op{display:none;}
+.about-callout{background:var(--bg);border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:14px 18px;margin:10px 0 14px;max-width:760px;}
+.about-callout .guide-body{margin:0;max-width:none;}
+.guide-diagram{margin:8px 0 4px;max-width:760px;}
+.gd-node{border:1px solid var(--line);border-radius:8px;padding:12px 16px;cursor:pointer;transition:border-color 0.12s,box-shadow .12s;background:var(--card);}
+.gd-node:hover{border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,0.05);}
+.gd-home{background:var(--bg);display:inline-block;margin-bottom:14px;}
+.gd-name{font-size:14px;font-weight:600;}
+.gd-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.gd-fan{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.gd-arm{display:flex;flex-direction:column;gap:6px;}
+.gd-arrow{font-size:12px;color:var(--muted);}
+.gd-arrow b{color:var(--ink);font-weight:600;}
+.guide-foot{font-size:13px;line-height:1.55;color:var(--ink);margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+.guide-foot b{font-weight:600;}
+.about-def{display:grid;grid-template-columns:180px 1fr;gap:11px 20px;margin:12px 0 4px;max-width:820px;}
+.about-def dt{font-size:13px;font-weight:700;color:var(--ink);}
+.about-def dd{margin:0;font-size:13px;line-height:1.5;color:#444;}
+.about-bullets{margin:8px 0 2px;padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink);}
+.about-bullets li{margin-bottom:3px;}
+.about-rq{list-style:none;margin:12px 0 4px;padding:0;max-width:760px;}
+.about-rq li{font-size:14px;line-height:1.5;margin-bottom:11px;}
+.about-rq b{color:var(--red);font-weight:700;margin-right:5px;}
+.sw{width:13px;height:13px;display:inline-block;vertical-align:-2px;margin-right:5px;border-radius:2px;}
+.sw-hi-ack{background:var(--red);}.sw-hi-no{background:var(--amber);}.sw-lo-ack{background:var(--red-pale);}.sw-lo-no{background:var(--empty);}
+.grid{display:grid;gap:0;font-size:11px;}
+.gcode{text-align:center;padding:6px 1px;color:var(--muted);font-size:9px;cursor:pointer;border-radius:3px;transition:background 0.12s;writing-mode:vertical-rl;transform:rotate(180deg);max-height:96px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 auto 4px;}
+.gcode:hover{background:var(--bg);color:var(--ink);}
+.gcode.colsel{background:var(--ink);color:white;}
+.gsector{grid-column:1/-1;padding:14px 0 6px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;border-top:1px solid var(--line);margin-top:6px;cursor:pointer;}
+.gsector:hover{color:var(--red);}
+.gsector.first{border-top:none;margin-top:0;}
+.gsector-hint{font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px;opacity:0;transition:opacity 0.12s;}
+.gsector:hover .gsector-hint{opacity:1;color:var(--muted);}
+.gco{padding:6px 8px 6px 0;font-size:12px;align-self:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border-radius:3px;transition:color 0.12s;}
+.gco:hover{color:var(--red);}
+.gco.rowsel{color:var(--red);font-weight:600;}
+.gcell{width:28px;height:28px;margin:3px;background:var(--empty);border-radius:2px;cursor:pointer;transition:transform 0.1s;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;}
+.gcell:hover{transform:scale(1.18);z-index:2;position:relative;}
+.gcell.hiack{background:var(--red);color:#fff;}
+.gcell.hino{background:var(--amber);color:var(--ink);}
+.gcell.loack{background:var(--red-pale);color:var(--red-dark);}
+.gcell.lono{color:var(--muted);}
+.gcell.selected{outline:2px solid var(--ink);outline-offset:2px;}
+.gcell.dim{opacity:0.2;}
+.glyph-x{font-weight:400;}
+.mx-legend{font-size:11px;color:var(--muted);margin-top:18px;margin-bottom:6px;line-height:1.4;max-width:780px;}
+.mx{display:grid;gap:0;font-size:13px;align-items:stretch;}
+.mx-axis{background:var(--red);color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;justify-content:center;padding:7px 4px;}
+.mx-axis+.mx-axis{border-left:2px solid #fff;}
+.mx-dh{border-bottom:1px solid var(--line);}
+.mx-domain{font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:0.02em;text-align:center;padding:8px 8px 9px;border-bottom:1px solid var(--line);border-left:1px solid #D2D2CE;line-height:1.28;display:flex;align-items:center;justify-content:center;min-width:0;overflow-wrap:break-word;}
+.mx-domain-last{border-right:1px solid #D2D2CE;}
+.mx-risk.mx-dstart{border-left:1px solid #D2D2CE;}
+.mx-risk.mx-dend{border-right:1px solid #D2D2CE;}
+.mx-h{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;padding:6px 4px;display:flex;align-items:flex-end;}
+.mx-h-co{padding-left:2px;font-size:13px;color:var(--ink);font-weight:700;}
+.mx-h-c{justify-content:center;font-size:13px;color:var(--ink);font-weight:700;}
+.mx-risk{justify-content:center;align-items:flex-end;text-align:center;white-space:nowrap;font-weight:600;font-size:15px;text-transform:none;letter-spacing:0;cursor:pointer;padding:7px 1px;}
+.mx-risk:hover{color:var(--red);}
+.mx-risk.colsel{color:var(--red);font-weight:700;}
+.mx-sec{display:flex;align-items:center;gap:6px;padding:9px 4px 9px 2px;font-size:14px;font-weight:600;cursor:pointer;border-top:1px solid var(--line);}
+.mx-sec:hover{color:var(--red);}
+.mx-tri{font-size:9px;color:var(--muted);transition:transform 0.12s;display:inline-block;}
+.mx-sec.open .mx-tri{transform:rotate(90deg);}
+.mx-secname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mx-seccount{font-size:11px;color:var(--muted);font-weight:400;}
+.mx-cov{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;border-top:1px solid var(--line);color:var(--ink);}
+.mx-docs{color:var(--muted);}
+.mx-cell{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;border-top:1px solid #fff;border-left:1px solid #fff;cursor:pointer;min-height:60px;}
+.mx-cell.mv4,.mx-leg-sw.mv4{background:var(--lvl-5);}
+.mx-cell.mv4{color:#fff;}
+.mx-cell.mv3,.mx-leg-sw.mv3{background:var(--lvl-4);}
+.mx-cell.mv3{color:var(--ink);}
+.mx-cell.mv2,.mx-leg-sw.mv2{background:var(--lvl-3);}
+.mx-cell.mv2{color:var(--ink);}
+.mx-cell.mv1,.mx-leg-sw.mv1{background:var(--lvl-2);}
+.mx-cell.mv1{color:var(--ink);}
+.mx-cell.mv0,.mx-leg-sw.mv0{background:var(--lvl-1);}
+.mx-cell.mv0{color:#fff;}
+.mx-cell.mvnd,.mx-leg-sw.mvnd{background:var(--lvl-0);}
+.mx-cell.mvnd{color:var(--muted);}
+.mx-leg-sw{display:inline-block;width:13px;height:13px;border-radius:2px;vertical-align:-2px;margin:0 4px 0 9px;}
+.mx-cell.dim{opacity:0.25;}
+#mx-tip{position:fixed;z-index:300;pointer-events:none;background:var(--ink);color:#fff;font-size:11px;line-height:1.35;padding:7px 10px;border-radius:5px;max-width:240px;box-shadow:0 4px 14px rgba(0,0,0,0.18);}
+#mx-tip b{font-weight:600;display:block;margin-bottom:2px;}
+#mx-tip span{color:#d9d9d9;}
+.mx-cell:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:2;}
+.mx-cell.selected{outline:2px solid var(--ink);outline-offset:-2px;}
+.mx-co{display:flex;flex-direction:column;justify-content:center;padding:7px 4px 7px 24px;font-size:13px;cursor:pointer;border-top:1px solid var(--line);background:var(--bg);}
+.mx-co:hover{color:var(--red);}
+.mx-co-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mx-co-role{font-size:10px;color:var(--muted);}
+.mx-co-cov{background:var(--bg);font-weight:400;color:var(--muted);}
+.mx-cocell{font-size:13px;background-clip:padding-box;min-height:34px;}
+.mx-cell.co-yes{background:var(--green);color:#fff;border-color:#fff;}
+.mx-cell.co-no{background:#fff;color:var(--muted);border-color:var(--line);}
+.mx-cocell.vx-extreme,.mx-cocell.vx-high{color:#fff;}
+.detail-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;}
+.detail-title{font-size:16px;font-weight:600;margin:6px 0 4px;line-height:1.25;}
+.detail-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.plain{font-size:13px;line-height:1.5;background:var(--bg);padding:11px 13px;border-radius:4px;margin-bottom:14px;}
+.sig-block{background:var(--bg);border-radius:4px;padding:12px 14px;margin-bottom:16px;}
+.sig-title{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:8px;}
+.sig-intro{font-size:12px;line-height:1.45;margin-bottom:12px;}
+.sig-def{font-size:11px;color:var(--muted);line-height:1.35;margin:-2px 0 8px;}
+.ex-row{padding:9px 0;border-bottom:1px solid var(--line);}
+.ex-row:first-of-type{border-top:1px solid var(--line);}
+.ex-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;}
+.ex-label{font-size:12px;font-weight:600;}
+.ex-band{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:2px 8px;border-radius:3px;flex-shrink:0;}
+.ex-band.vx-extreme{background:#A32035;color:#fff;}
+.ex-band.vx-high{background:#D86C4A;color:#fff;}
+.ex-band.vx-mod{background:#EFB663;color:var(--ink);}
+.ex-band.vx-low{background:#FBF0C8;color:var(--ink);}
+.ex-track{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:5px;}
+.ex-fill{height:100%;border-radius:2px;}
+.ex-fill.vx-extreme-fill{background:#A32035;}
+.ex-fill.vx-high-fill{background:#D86C4A;}
+.ex-fill.vx-mod-fill{background:#EFB663;}
+.ex-fill.vx-low-fill{background:#E8D9A8;}
+.ex-def{font-size:11px;color:var(--muted);line-height:1.35;}
+.ex-score{display:flex;justify-content:space-between;align-items:center;padding-top:11px;margin-top:11px;border-top:1px solid var(--line);}
+.ex-score .lbl{font-size:12px;font-weight:600;}
+.ex-score .val{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:3px 10px;border-radius:3px;}
+.ex-score .val.high{background:#A32035;color:#fff;}
+.ex-score .val.mod{background:#EFB663;color:var(--ink);}
+.evidence-empty{background:#FBF3E0;border:1px solid #F0DCA8;padding:14px;border-radius:4px;text-align:center;color:var(--amber-deep);font-size:13px;}
+.evidence-quote{background:var(--bg);padding:13px 15px;border-left:2px solid var(--red);margin:10px 0;font-size:13px;line-height:1.5;}
+.evidence-note{background:var(--bg);padding:8px 13px;border-left:2px solid var(--line);margin:6px 0 0;font-size:12px;color:var(--muted);font-style:italic;}
+.evidence-source{font-size:11px;color:var(--muted);margin-top:6px;}
+.evidence-source a{color:var(--red);text-decoration:none;}
+.detail-placeholder{color:var(--muted);font-size:13px;padding:30px 10px;text-align:center;line-height:1.5;}
+.detail-action{display:block;width:100%;padding:9px;background:var(--ink);color:white;border:none;border-radius:4px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;margin-top:16px;}
+.detail-action:hover{background:var(--red);}
+.rank-list{margin-top:4px;}
+.rank-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--line);cursor:pointer;}
+.rank-item:hover{color:var(--red);}
+.rank-num{color:var(--muted);font-size:11px;width:16px;flex-shrink:0;}
+.rank-name{flex:1;}
+.rank-dot{width:11px;height:11px;border-radius:2px;flex-shrink:0;}
+.rank-dot.hiack{background:var(--red);}.rank-dot.hino{background:var(--amber);}.rank-dot.loack{background:var(--red-pale);}.rank-dot.lono{background:var(--empty);}
+.rk-row:hover{background:var(--bg);}
+.sec-intro{font-size:13px;line-height:1.5;margin-bottom:16px;max-width:760px;}
+.sec-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.risk-domain-group{border-top:2px solid var(--line);padding-top:14px;margin-top:18px;}
+.risk-domain-group:first-of-type{border-top:none;padding-top:4px;margin-top:8px;}
+.risk-domain-h{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink);margin:0 0 9px;}
+.risk-domain-h:first-of-type{margin-top:4px;}
+.risk-domain-ic{width:17px;height:17px;display:inline-flex;align-items:center;color:var(--muted);}
+.risk-domain-ic svg{width:17px;height:17px;}
+.risk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:6px;margin-bottom:4px;}
+.risk-card{border:1px solid var(--line);border-radius:6px;padding:10px 11px;cursor:pointer;background:var(--card);transition:border-color .12s,box-shadow .12s;}
+.risk-card:hover{border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,0.06);}
+.risk-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.risk-card-num{font-weight:700;color:var(--muted);margin-right:6px;}
+.risk-sev-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.15);}
+.risk-card-name{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:5px;}
+.risk-card-meta{font-size:11.5px;color:var(--muted);}
+.risk-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.risk-tbl th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);font-weight:700;padding:8px 12px;border-bottom:2px solid var(--ink);}
+.risk-tbl-cov-h{text-align:right;width:92px;}
+.risk-tbl-domain td{font-weight:700;font-style:italic;font-size:13.5px;padding:15px 12px 7px;border-bottom:1px solid var(--line);}
+.risk-tbl-row{cursor:pointer;}
+.risk-tbl-row:hover{background:var(--bg);}
+.risk-tbl-row td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+.risk-tbl-name{width:248px;font-weight:600;line-height:1.35;}
+.risk-tbl-name b{color:var(--muted);font-weight:700;margin-right:6px;}
+.rtl-link{color:var(--red);font-weight:600;}
+.risk-tbl-row:hover .rtl-link{text-decoration:underline;}
+.rtl-arr{color:var(--red);font-weight:700;margin-left:3px;}
+.risk-tbl-desc{color:#444;line-height:1.5;}
+.risk-tbl-cov{text-align:right;width:92px;font-weight:700;color:var(--ink);white-space:nowrap;}
+.sec-card{border:1px solid var(--line);border-radius:6px;padding:14px 16px;cursor:pointer;transition:border-color 0.12s;}
+.sec-card:hover{border-color:var(--ink);}
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.sec-icon{width:26px;height:26px;color:var(--red);flex-shrink:0;display:inline-flex;}
+.sec-icon svg{width:100%;height:100%;}
+.sec-name{font-size:14px;font-weight:600;flex:1;}
+.sec-count{font-size:11px;color:var(--muted);}
+.sec-cardgap{font-size:12px;color:var(--amber-deep);display:flex;flex-wrap:wrap;align-items:center;}
+.gap-item{display:inline-flex;align-items:center;gap:4px;margin-left:8px;white-space:nowrap;}
+.gap-icon{width:15px;height:15px;color:var(--amber-deep);flex-shrink:0;display:inline-flex;}
+.gap-icon svg{width:100%;height:100%;}
+.sec-carddef{font-size:11px;color:var(--muted);line-height:1.4;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.sec-detaildef{font-size:13px;line-height:1.5;color:var(--ink);background:var(--bg);border-radius:4px;padding:11px 13px;margin-bottom:16px;max-width:760px;white-space:pre-wrap;}
+.sec-summary{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);max-width:820px;}
+.sec-sum-h{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin:12px 0 4px;}
+.sec-sum-h:first-child{margin-top:0;}
+.sec-sum-p{font-size:13px;line-height:1.5;}
+.sec-sum-p b{font-weight:600;}
+.sec-sum-ex{margin:7px 0 0;padding-left:18px;font-size:12px;line-height:1.5;color:#444;}
+.sec-sum-ex li{margin-bottom:4px;}
+.sec-back{font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:12px;display:inline-block;}
+.sec-back:hover{color:var(--ink);}
+.sec-detail-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;}
+.shm{display:grid;gap:0;font-size:11px;align-items:stretch;}
+.shm-h{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;padding:0 4px 8px;display:flex;align-items:flex-end;}
+.shm-co{writing-mode:vertical-rl;transform:rotate(180deg);justify-content:flex-start;white-space:nowrap;padding:0 4px 6px;margin:0 auto;font-weight:500;text-transform:none;letter-spacing:0;cursor:pointer;}
+.shm-co:hover{color:var(--red);text-decoration:underline;}
+.shm-risk{font-size:12px;padding:0 8px;display:flex;align-items:center;border-top:1px solid var(--line);cursor:pointer;}
+.shm-risk:hover{color:var(--red);}
+.shm-sig{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;margin:1px;border-radius:2px;}
+.vx-extreme{background:var(--red);color:#fff;}.vx-high{background:#E8895A;color:#fff;}.vx-mod{background:#F0C088;color:var(--ink);}.vx-low{background:#F3E2C0;color:var(--ink);}
+.shm-cov{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;border-top:1px solid var(--line);}
+.shm-cell{display:flex;align-items:center;justify-content:center;height:30px;margin:1px;border-radius:2px;font-size:14px;cursor:pointer;background:#F4F4F2;}
+.shm-cell.yes{background:var(--green);color:#fff;}.shm-cell.gap{background:var(--amber);color:var(--ink);}.shm-cell.no{background:#F4F4F2;color:var(--muted);}
+.shm-cell:hover{outline:2px solid var(--ink);outline-offset:-2px;}
+.shm-legend{display:flex;gap:18px;font-size:11px;color:var(--muted);margin-top:16px;flex-wrap:wrap;}
+.shm-axis{background:#1A1A1A;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;line-height:1.25;text-align:center;display:flex;align-items:center;justify-content:center;padding:6px 4px;}
+.shm-axis.shm-sorth{cursor:pointer;}
+.shm-axis.shm-sorth:hover{background:#333;}
+.shm-axis .tip{border-bottom-color:rgba(255,255,255,0.5);}
+.shm-corow-lbl{grid-column:1/4;display:flex;align-items:center;justify-content:flex-end;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;padding:5px 8px;border-bottom:1px solid var(--line);}
+.shm-cocov{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line);padding:5px 0;}
+.view-controls{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;color:var(--muted);margin:4px 0 14px;}
+.view-ctrl-sel{width:auto;display:inline-block;padding:5px 26px 5px 9px;font-size:12px;}
+.shm-sw-yes{background:var(--green);}.shm-sw-gap{background:var(--amber);}.shm-sw-no{background:#F4F4F2;}
+.cmp-intro{font-size:13px;line-height:1.5;margin-bottom:16px;max-width:760px;}
+.co-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:var(--muted);}
+.co-search{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;min-width:260px;color:var(--ink);}
+.co-sortsel{width:auto;display:inline-block;padding:6px 26px 6px 9px;font-size:12px;}
+.co-count{margin-left:auto;}
+.cotbl{width:100%;border-collapse:collapse;font-size:13px;}
+.cotbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);font-weight:600;padding:7px 10px;border-bottom:1px solid var(--line);}
+.cotbl td{padding:8px 10px;border-bottom:1px solid var(--line);}
+.cotbl tbody tr{cursor:pointer;}
+.cotbl tbody tr:hover{background:var(--bg);}
+.cotbl tbody tr.sel{background:#FBF0F2;}
+.cotbl-co{font-weight:600;}
+.cotbl-mut{color:var(--muted);}
+.cotbl-num{text-align:right;width:96px;font-weight:600;}
+.cotbl-group td{font-weight:700;font-size:12.5px;padding:14px 10px 6px;border-bottom:1px solid var(--line);color:var(--ink);}
+.cotbl-group-n{color:var(--muted);font-weight:600;margin-left:8px;}
+.cp-meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:14px 0 6px;}
+.cp-meta-item{border:1px solid var(--line);border-radius:7px;padding:11px 13px;}
+.cp-meta-k{font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);font-weight:700;margin-bottom:4px;}
+.cp-meta-v{font-size:14px;font-weight:600;}
+.cp-meta-v.cp-ph{color:var(--muted);font-weight:400;font-style:italic;}
+.cp-rolesum{margin-top:14px;font-size:13.5px;line-height:1.55;color:#333;max-width:840px;}
+.cp-rolesum-h{font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);font-weight:700;margin-bottom:5px;}
+.cp-sec-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:22px 0 9px;}
+.cp-ph-box{font-size:13px;color:var(--muted);background:var(--bg);border:1px dashed var(--line);border-radius:6px;padding:12px 14px;line-height:1.5;}
+.cp-risk-list{display:flex;flex-wrap:wrap;gap:7px;}
+.cp-risk-chip{font-size:12.5px;border:1px solid var(--line);border-radius:14px;padding:5px 11px;cursor:pointer;background:var(--card);line-height:1.3;}
+.cp-risk-chip:hover{border-color:var(--ink);}
+.cp-risk-chip b{color:var(--muted);margin-right:6px;font-weight:700;}
+.cp-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;margin-top:6px;}
+.cp-line{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer;}
+.cp-line:hover .cp-line-name{color:var(--red);}
+.cp-band{flex-shrink:0;width:76px;text-align:center;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;padding:3px 0;border-radius:4px;}
+.cp-line-name{flex:1;font-size:13px;line-height:1.3;}
+.cp-line-tag{flex-shrink:0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;}
+.cp-line-tag.yes{color:#2E8B57;}
+.cp-line-tag.no{color:var(--muted);}
+.cp-head{display:flex;align-items:center;gap:14px;margin:8px 0 4px;}
+.cp-logo{height:46px;width:46px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:#fff;padding:4px;flex-shrink:0;}
+.cp-name{font-size:20px;font-weight:600;letter-spacing:-0.01em;}
+.cp-subline{font-size:13px;color:var(--muted);margin-top:2px;}
+.cp-desc{font-size:13.5px;line-height:1.55;color:#444;max-width:820px;margin:12px 0 16px;}
+.cp-block{margin:0 -22px;padding:18px 22px 20px;border-top:1px solid var(--line);}
+.cp-block.cp-shade{background:var(--bg);}
+.cp-block>.cp-sec-title:first-child{margin-top:0;}
+.cp-meta-v a{color:var(--red);text-decoration:none;}
+.cp-meta-v a:hover{text-decoration:underline;}
+.cp-doclist{margin:6px 0 0;padding-left:20px;font-size:13px;line-height:1.6;color:#444;}
+.cp-doclist li{margin-bottom:3px;}
+.cp-docs{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;margin-top:2px;}
+.cp-doc{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;overflow:hidden;text-decoration:none;color:var(--ink);background:var(--card);transition:border-color .12s,box-shadow .12s;}
+.cp-doc:hover{border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,0.07);}
+.cp-doc-thumb{position:relative;display:flex;align-items:center;justify-content:center;height:118px;background:var(--bg);border-bottom:1px solid var(--line);overflow:hidden;}
+.cp-doc-thumb::before{content:'PDF';position:absolute;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:0.08em;}
+.cp-doc-thumb img{position:relative;z-index:1;width:100%;height:118px;object-fit:cover;object-position:top;background:#fff;}
+.cp-doc-body{display:flex;flex-direction:column;gap:3px;padding:9px 10px;}
+.cp-doc-title{font-size:12px;line-height:1.35;font-weight:500;}
+.cp-doc-type{font-size:9.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);font-weight:700;}
+.cp-doc:hover .cp-doc-title{color:var(--red);}
+.doc-cat{border:1px solid var(--line);border-radius:8px;margin-bottom:12px;overflow:hidden;}
+.doc-cat-h{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:14px;font-weight:700;color:var(--ink);}
+.doc-cat-h::-webkit-details-marker{display:none;}
+.doc-cat-h::before{content:'›';font-size:16px;color:var(--muted);transition:transform .15s;display:inline-block;}
+.doc-cat[open]>.doc-cat-h::before{transform:rotate(90deg);}
+.doc-cat-n{font-size:12px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:10px;padding:1px 9px;margin-left:auto;}
+.doc-cat-body{padding:12px 14px 16px;}
+.docs-grid{grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:8px;}
+.docs-grid .cp-doc-thumb{height:82px;}
+.docs-grid .cp-doc-thumb img{height:82px;}
+.docs-grid .cp-doc-body{padding:6px 8px;gap:2px;}
+.docs-grid .cp-doc-title{font-size:11px;line-height:1.3;}
+.docs-grid .cp-doc-type{font-size:9px;}
+.cp-mx-intro{font-size:13px;color:#444;line-height:1.5;max-width:760px;margin:2px 0 12px;}
+.cpm{display:grid;gap:0;position:relative;max-width:760px;}
+.cpm-axis{background:#1A1A1A;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;justify-content:center;padding:6px 4px;}
+.cpm-axis-corner{background:#1A1A1A;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;padding:6px 4px;border-right:1px solid #fff;}
+.cpm-colh{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.02em;text-align:center;line-height:1.15;padding:5px 3px;color:#fff;border-left:1px solid #fff;display:flex;align-items:center;justify-content:center;}
+.cpm-rowh{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.02em;line-height:1.15;padding:5px 7px;color:#fff;border-top:1px solid #fff;display:flex;align-items:center;}
+.cpm-l5{background:var(--lvl-5);}
+.cpm-l4{background:var(--lvl-4);color:var(--ink);}
+.cpm-l3{background:var(--lvl-3);color:var(--ink);}
+.cpm-l2{background:var(--lvl-2);color:var(--ink);}
+.cpm-l1{background:var(--lvl-1);}
+.cpm-cell{border-top:1px solid var(--line);border-left:1px solid var(--line);min-height:46px;padding:5px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;}
+.cpm-hot{background:rgba(163,32,53,0.05);}
+.cpm-chip{font-size:11px;font-weight:700;padding:3px 7px;border-radius:11px;cursor:pointer;}
+.cpm-chip.yes{background:var(--d5);color:#fff;}
+.cpm-chip.no{background:#E6E6E4;color:#8A8A88;}
+.cpm-chip:hover{outline:2px solid var(--ink);outline-offset:-2px;}
+.cpm-bracket{position:absolute;border:2px solid var(--red);border-radius:6px;pointer-events:none;z-index:2;box-shadow:0 0 0 4px rgba(163,32,53,0.05);}
+.cpm-bracket-tag{position:absolute;top:-9px;left:8px;background:var(--red);color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;border-radius:3px;}
+.cpm-legend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:10px;font-size:11px;color:var(--muted);}
+.cpm-legend>span{display:flex;align-items:center;gap:6px;}
+.cpm-key{width:12px;height:12px;border-radius:6px;display:inline-block;}
+.cpm-key.yes{background:var(--d5);}
+.cpm-key.no{background:#E6E6E4;}
+.cpm-key-num{color:var(--muted);}
+.cmp-filters{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;padding:14px 16px;background:var(--bg);border-radius:6px;margin-bottom:14px;}
+.cmp-fgroup{display:flex;flex-direction:column;gap:7px;}
+.cmp-flabel{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);}
+.cmp-fchips{display:flex;gap:6px;flex-wrap:wrap;}
+.cmp-fchip{font-size:11px;padding:4px 10px;border:1px solid var(--line);border-radius:13px;cursor:pointer;background:var(--card);transition:all 0.1s;}
+.cmp-fchip:hover{border-color:var(--muted);}
+.cmp-fchip.on{background:var(--red);color:#fff;border-color:var(--red);}
+.cmp-clearf{font-size:11px;color:var(--muted);cursor:pointer;align-self:center;margin-left:auto;text-decoration:underline;}
+.cmp-clearf:hover{color:var(--ink);}
+.cmp-status{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted);margin-bottom:10px;}
+.cmp-clearsel{cursor:pointer;text-decoration:underline;}
+.cmp-clearsel:hover{color:var(--ink);}
+.cmp-pool{margin-bottom:20px;}
+.cmp-poolsec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin:12px 0 6px;}
+.cmp-pick{display:flex;gap:8px;flex-wrap:wrap;}
+.cmp-chip{font-size:12px;padding:5px 11px;border:1px solid var(--line);border-radius:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all 0.1s;}
+.cmp-chip:hover{border-color:var(--muted);}
+.cmp-chip.on{background:var(--ink);color:white;border-color:var(--ink);}
+.cmp-chip.disabled{opacity:0.4;cursor:default;}
+.cmp-chip.disabled:hover{border-color:var(--line);}
+.cmp-chip-role{font-size:10px;opacity:0.6;}
+.cmp-chip.on .cmp-chip-role{opacity:0.7;}
+.cmp-gridwrap{overflow-x:auto;}
+.cmp-grid{display:grid;gap:0;font-size:11px;min-width:420px;}
+.cmp-corner{position:sticky;left:0;background:var(--card);}
+.cmp-co{font-size:12px;font-weight:600;text-align:center;padding:8px 4px;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--line);}
+.cmp-co-sec{font-size:10px;color:var(--muted);font-weight:400;}
+.cmp-cell{height:28px;margin:3px;border-radius:2px;background:var(--empty);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;}
+.cmp-cell:hover{outline:2px solid var(--ink);outline-offset:-2px;}
+.cmp-cell.hiack{background:var(--red);color:#fff;}.cmp-cell.hino{background:var(--amber);color:var(--ink);}.cmp-cell.loack{background:var(--red-pale);color:var(--red-dark);}
+.cmp-rlabel{font-size:11px;color:var(--muted);align-self:center;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.cmp-rlabel:hover{color:var(--red);}
+.rvm{display:grid;gap:0;font-size:11px;align-items:stretch;margin-top:14px;}
+.rvm-sector{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;margin-top:8px;border-radius:3px;}
+.rvm-sector.vx-extreme{background:var(--red);}
+.rvm-sector.vx-extreme .rvm-secname,.rvm-sector.vx-extreme .rvm-secvuln{color:#fff;}
+.rvm-sector.vx-high{background:#E8895A;}
+.rvm-sector.vx-high .rvm-secname,.rvm-sector.vx-high .rvm-secvuln{color:#fff;}
+.rvm-sector.vx-mod{background:#F0C088;}
+.rvm-sector.vx-mod .rvm-secname,.rvm-sector.vx-mod .rvm-secvuln{color:var(--ink);}
+.rvm-sector.vx-low{background:#F3E2C0;}
+.rvm-sector.vx-low .rvm-secname,.rvm-sector.vx-low .rvm-secvuln{color:var(--ink);}
+.rvm-secname{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;}
+.rvm-secname:hover{opacity:0.75;}
+.rvm-secvuln{font-size:11px;font-weight:600;}
+.rvm-name{font-size:13px;font-weight:500;padding:8px;border-top:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;justify-content:center;}
+.rvm-name:hover{color:var(--red);}
+.rvm-meta{font-size:11px;color:var(--muted);font-weight:400;margin-top:2px;}
+.rvm-disccell{display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line);}
+.rvm-disc{width:26px;height:26px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.rvm-disc.yes{background:var(--green);color:#fff;}
+.rvm-disc.no{background:#F4F4F2;}
+.rvm .shm-sig{border-top:1px solid var(--line);border-radius:0;margin:0;}
+.rvm-sector{cursor:pointer;gap:8px;}
+.rvm-sectri{font-size:9px;display:inline-block;transition:transform 0.12s;flex-shrink:0;}
+.rvm-sector.open .rvm-sectri{transform:rotate(90deg);}
+.rvm-secname{flex:1;}
+.rvm-secmeta{display:flex;align-items:center;gap:14px;}
+.rvm-seccov{font-size:11px;font-weight:600;opacity:0.92;}
+.rvm-respcell{display:flex;align-items:center;padding:6px 8px;border-top:1px solid var(--line);}
+.rvm-resp{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:4px 12px;border-radius:3px;}
+.rvm-hint{font-size:12px;color:var(--muted);line-height:1.5;margin:8px 0 2px;max-width:760px;}
+.rv{margin-top:6px;}
+.rv-sector{display:flex;align-items:center;gap:8px;padding:8px 12px;margin-top:6px;border-radius:3px;cursor:pointer;}
+.rv-sector.vx-extreme{background:var(--red);}.rv-sector.vx-extreme .rv-secname,.rv-sector.vx-extreme .rv-secmeta{color:#fff;}
+.rv-sector.vx-high{background:#E8895A;}.rv-sector.vx-high .rv-secname,.rv-sector.vx-high .rv-secmeta{color:#fff;}
+.rv-sector.vx-mod{background:#F0C088;}.rv-sector.vx-mod .rv-secname,.rv-sector.vx-mod .rv-secmeta{color:var(--ink);}
+.rv-sector.vx-low{background:#F3E2C0;}.rv-sector.vx-low .rv-secname,.rv-sector.vx-low .rv-secmeta{color:var(--ink);}
+.rv-sectri{font-size:9px;transition:transform 0.12s;flex-shrink:0;}
+.rv-sector.open .rv-sectri{transform:rotate(90deg);}
+.rv-secname{flex:1;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
+.rv-secmeta{display:flex;align-items:center;gap:14px;font-size:11px;font-weight:600;}
+.rv-body{padding:2px 0 10px 16px;}
+.rv-actor{display:flex;align-items:center;gap:8px;margin:12px 0 7px;flex-wrap:wrap;}
+.rv-actorname{font-size:12px;font-weight:600;}
+.rv-resplbl{font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);}
+.rv-resp{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:3px 9px;border-radius:3px;}
+.rv-xtag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--red);background:var(--red-pale);padding:3px 8px;border-radius:3px;}
+.rv-focus .rv-actorname{color:var(--red);}
+.rv-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.rv-chip{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:13px;cursor:pointer;background:var(--card);white-space:nowrap;}
+.rv-chip:hover{border-color:var(--muted);}
+.rv-chip.yes{background:var(--green);color:#fff;border-color:var(--green);}
+.rvx{display:grid;gap:3px;margin-top:12px;align-items:stretch;}
+.rvx-corner{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;display:flex;flex-direction:column;justify-content:flex-end;line-height:1.6;padding:4px 6px;}
+.rvx-colh{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:flex-end;padding:4px 3px 6px;text-align:center;}
+.rvx-role{font-size:10px;font-weight:600;line-height:1.18;}
+.rvx-rowh{display:flex;flex-direction:column;justify-content:center;gap:3px;padding:6px 9px;border-radius:3px;background:var(--bg);}
+.rvx-sec{font-size:12px;font-weight:600;}
+.rvx-lvl{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--muted);}
+.rvx-dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0;}
+.rvx-cell{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;border-radius:3px;min-height:40px;cursor:pointer;}
+.rvx-cell.rvx-empty{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 4px,#f0f0ee 4px,#f0f0ee 8px);cursor:default;}
+.rvx-cell:not(.rvx-empty):hover{outline:2px solid var(--ink);outline-offset:-2px;}
+.rvx-cell.sel{outline:2px solid var(--ink);outline-offset:-2px;}
+.rvx-foc{box-shadow:inset 0 0 0 2px var(--red);}
+.rvx-detail{margin-top:16px;}
+.rvx-detail-h{font-size:12px;font-weight:600;margin-bottom:8px;}
+.rvx-rowh{cursor:pointer;}
+.rvx-rowh:hover{outline:1px solid var(--muted);outline-offset:-1px;}
+.rvx-rowh.sel{outline:2px solid var(--ink);outline-offset:-2px;}
+.rvx-keybox{display:inline-block;width:14px;height:14px;border-radius:2px;vertical-align:-2px;margin-right:5px;background:#eee;}
+.rvx-arow{display:flex;align-items:center;gap:8px;margin:12px 0 6px;}
+.rvx-aname{font-size:12px;font-weight:600;}
+.rvx-legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:11px;color:var(--muted);margin-top:16px;align-items:center;}
+.rvx-leg{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.rvx-leg b{color:var(--ink);font-weight:600;}
+.rvtbl{width:100%;max-width:640px;border-collapse:collapse;font-size:13px;margin-top:6px;}
+.rvtbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);font-weight:600;padding:6px 10px;border-bottom:1px solid var(--line);}
+.rvtbl-title th{background:var(--red);color:#fff;text-align:left;font-size:12.5px;font-weight:600;text-transform:none;letter-spacing:0;padding:9px 11px;border-bottom:none;}
+.rvtbl-title th .tip{color:#fff;border-bottom-color:rgba(255,255,255,0.55);}
+.rvtbl td{padding:7px 10px;border-bottom:1px solid var(--line);}
+.rvtbl tbody tr{cursor:pointer;}
+.rvtbl tbody tr:hover{background:var(--bg);}
+.rvtbl-co{font-weight:500;}
+.rvtbl-role{color:var(--muted);font-size:12px;}
+.rvtbl-disc{text-align:center;width:80px;}
+.rvtbl-yes{color:var(--green);font-weight:700;}
+.rvtbl-no{color:var(--muted);}
+.rvx-zone{position:relative;border:2px dashed var(--red);border-radius:5px;pointer-events:none;z-index:4;}
+.rvx-zone-lbl{position:absolute;top:-8px;left:8px;background:var(--card);color:var(--red);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:0 5px;white-space:nowrap;}
+.rvx-zonekey{border:2px dashed var(--red);background:transparent;}
+.rvx-corner-arrow{color:var(--red);font-weight:700;}
+/* ---- risk view v2 (sector vulnerability x role responsibility) ---- */
+:root{--lvl-5:#D6322A;--lvl-4:#F0A24E;--lvl-3:#F2E07A;--lvl-2:#A9CCE0;--lvl-1:#2D6FAF;--lvl-0:#E2E2E0;--d0:#F1F1EF;--d1:#DDEBE0;--d2:#B9D9C2;--d3:#8FC4A1;--d4:#5BA77D;--d5:#2E8B57;}
+.rv2-matrix{display:grid;gap:0;position:relative;margin-top:6px;}
+.rv2-corner{background:transparent;}
+.rv2-axis{background:#1A1A1A;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;justify-content:center;padding:6px 4px;text-align:center;}
+.rv2-axis-v{letter-spacing:0.04em;font-size:10px;}
+.rv2-lvl{display:flex;align-items:center;justify-content:center;text-align:center;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.02em;line-height:1.15;padding:3px;border-top:1px solid #fff;border-left:1px solid #fff;}
+.rv2-lvl.l5{background:var(--lvl-5);color:#fff;}
+.rv2-lvl.l4{background:var(--lvl-4);color:var(--ink);}
+.rv2-lvl.l3{background:var(--lvl-3);color:var(--ink);}
+.rv2-lvl.l2{background:var(--lvl-2);color:var(--ink);}
+.rv2-lvl.l1{background:var(--lvl-1);color:#fff;}
+.rv2-lvl.l0{background:var(--lvl-0);color:var(--muted);}
+.rv2-colh{padding:10px 4px 9px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;justify-content:flex-end;border-left:1px solid var(--line);}
+.rv2-colname{font-size:11px;font-weight:600;line-height:1.2;}
+.rv2-rowh{display:flex;align-items:center;padding:0 10px 0 2px;cursor:pointer;border-top:1px solid var(--line);}
+.rv2-rowh:hover .rv2-rowname,.rv2-rowh.sel .rv2-rowname{color:var(--red);}
+.rv2-rowname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rv2-cell{border-top:1px solid var(--line);border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center;min-height:46px;cursor:pointer;position:relative;font-size:12.5px;font-weight:600;}
+.rv2-cell:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:3;}
+.rv2-cell.sel{outline:2px solid var(--ink);outline-offset:-2px;z-index:3;}
+.rv2-cell.empty{background:repeating-linear-gradient(45deg,#fbfbfa,#fbfbfa 5px,#f3f3f1 5px,#f3f3f1 10px);cursor:default;}
+.rv2-cell.empty:hover{outline:none;}
+.rv2-cell.d-0{background:var(--d0);color:#9A9A98;}
+.rv2-cell.d-1{background:var(--d1);color:var(--ink);}
+.rv2-cell.d-2{background:var(--d2);color:var(--ink);}
+.rv2-cell.d-3{background:var(--d3);color:var(--ink);}
+.rv2-cell.d-4{background:var(--d4);color:#fff;}
+.rv2-cell.d-5{background:var(--d5);color:#fff;}
+.rv2-hookzone{position:absolute;border:2px solid var(--red);border-radius:6px;pointer-events:none;z-index:2;box-shadow:0 0 0 4px rgba(163,32,53,0.05);}
+.rv2-hooktag{position:absolute;top:-10px;left:10px;background:var(--red);color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:2px 7px;border-radius:3px;}
+.rv2-instr{margin-bottom:14px;}
+.rv2-instr summary{font-size:11.5px;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:5px;user-select:none;}
+.rv2-instr summary::-webkit-details-marker{display:none;}
+.rv2-instr summary::before{content:'\203a';display:inline-block;transition:transform 0.15s;font-size:13px;}
+.rv2-instr[open] summary::before{transform:rotate(90deg);}
+.rv2-instr-body{font-size:12.5px;color:#444;line-height:1.5;margin-top:8px;max-width:760px;}
+.rv2-instr-body b{color:var(--ink);font-weight:600;}
+.rv2-legends{display:flex;flex-wrap:wrap;gap:14px 24px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);align-items:center;}
+.rv2-leg{display:flex;align-items:center;gap:8px;}
+.rv2-leglab{font-weight:600;color:#444;}
+.rv2-ramp{display:flex;}
+.rv2-sw{width:17px;height:13px;display:inline-block;}
+.rv2-band{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:2px;}
+.rv2-band-empty{background:repeating-linear-gradient(45deg,#fbfbfa,#fbfbfa 3px,#f3f3f1 3px,#f3f3f1 6px);border:1px solid var(--line);border-radius:0;}
+.rv2-ends{display:flex;gap:5px;align-items:center;}
+</style>
+</head>
+<body>
+<div id="lock-screen">
+  <form id="lock-form" class="lock-box">
+    <div class="lock-title">AI Risk Disclosure Explorer</div>
+    <div class="lock-sub">This preview is password protected.</div>
+    <input type="password" id="lock-input" class="lock-input" placeholder="Password" autocomplete="current-password">
+    <button type="submit" class="lock-btn" id="lock-btn">Unlock</button>
+    <div class="lock-err" id="lock-err"></div>
+  </form>
+</div>
+<div id="tour-chooser" class="chooser" style="display:none;">
+  <div class="chooser-card">
+    <div class="chooser-title">Choose a walkthrough</div>
+    <div class="chooser-sub">Pick the role closest to yours, or take the general tour.</div>
+    <div class="chooser-list" id="chooser-list"></div>
+    <button class="chooser-close" id="chooser-close">Maybe later</button>
+  </div>
+</div>
+<div id="tour" class="tour" style="display:none;">
+  <div class="tour-spot" id="tour-spot"></div>
+  <div class="tour-card" id="tour-card">
+    <div class="tour-step-n" id="tour-stepn"></div>
+    <div class="tour-title" id="tour-title"></div>
+    <div class="tour-body" id="tour-body"></div>
+    <div class="tour-nav">
+      <button class="tour-skip" id="tour-skip">Skip tour</button>
+      <div class="tour-nav-r">
+        <button class="tour-btn" id="tour-back">Back</button>
+        <button class="tour-btn primary" id="tour-next">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="page">
+  <div id="intro-overlay" class="intro-overlay">
+    <div class="intro-card">
+      <img class="intro-logo" src="https://cdn.prod.website-files.com/669550d38372f33552d2516e/69e6bfd322a7b39895d54390_horizontal-on-light.svg" alt="AI Risk Repository, MIT FutureTech">
+      <div class="intro-title">Welcome to the AI Risk Disclosure Explorer</div>
+      <div class="intro-body"><p>This tool maps what large global companies actually say about AI risk. We reviewed public disclosures from roughly 200 of the world's largest companies and coded every risk they acknowledge against the <b>AI Risk Repository</b> taxonomy.</p><p>Filter by company, sector, actor role, risk, or mitigation, and compare what companies disclose against expert-rated <b>severity</b>, <b>sector vulnerability</b>, and <b>actor responsibility</b>.</p></div>
+      <div class="intro-actions">
+        <button class="intro-btn primary" id="intro-start">Explore</button>
+        <button class="intro-btn" id="intro-tour">Take a tour</button>
+        <button class="intro-btn" id="intro-guide">Full guide</button>
+      </div>
+    </div>
+  </div>
+  <div class="sitebar">
+    <a class="sitebar-logo" href="https://airisk.mit.edu/" target="_blank" rel="noopener"><img src="https://cdn.prod.website-files.com/669550d38372f33552d2516e/69e6bfd322a7b39895d54390_horizontal-on-light.svg" alt="AI Risk Repository — MIT FutureTech"></a>
+    <nav class="sitenav">
+      <a href="https://airisk.mit.edu/priorities" target="_blank" rel="noopener">Priority Risks</a>
+      <a href="https://airisk.mit.edu/risks" target="_blank" rel="noopener">All Risks</a>
+      <a href="https://airisk.mit.edu/ai-incident-tracker" target="_blank" rel="noopener">Incidents</a>
+      <a href="https://airisk.mit.edu/ai-risk-mitigations" target="_blank" rel="noopener">Mitigations</a>
+      <a href="https://airisk.mit.edu/ai-governance" target="_blank" rel="noopener">Governance</a>
+      <a href="https://airisk.mit.edu/navigator" target="_blank" rel="noopener">Navigator</a>
+      <a href="https://airisk.mit.edu/blog" target="_blank" rel="noopener">Blog</a>
+      <a href="https://airisk.mit.edu/team" target="_blank" rel="noopener">Team</a>
+    </nav>
+  </div>
+  <header class="header"><h1>AI Risk Disclosure Explorer</h1><p class="header-sub">We systematically reviewed the public disclosures of 200 of the world's largest companies to see which AI risks they acknowledge, which they overlook, and how that compares with what experts judge most important.</p></header>
+
+  <div class="layout">
+    <aside class="panel" id="left-panel">
+      <div id="panel-matrix">
+      <div class="panel-title">Filters</div>
+      <div class="filter-group"><div class="filter-label">Sector</div>
+        <select class="filter-select" id="f-sector"><option>All sectors (14)</option><option>Finance</option><option>Technology</option><option>Energy</option><option>Healthcare</option><option>Manufacturing</option><option>Retail</option></select></div>
+      <div class="filter-group"><div class="filter-label">Actor role</div>
+        <select class="filter-select" id="f-actor"><option>All roles</option><option>AI developer</option><option>AI deployer</option><option>Infrastructure provider</option><option>User</option></select></div>
+      <div class="filter-group"><div class="filter-label">Sort companies</div>
+        <select class="filter-select" id="f-sort"><option>Name (A–Z)</option><option selected>Coverage (high to low)</option><option>Coverage (low to high)</option></select></div>
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px;">
+        <div class="panel-title" style="margin-bottom:8px;">Risk columns</div>
+        <select class="filter-select" id="f-colmode"><option>Grouped by domain</option><option>Ordered by severity</option><option>By sector vulnerability</option></select></div>
+      <div class="filter-group" style="margin-top:14px;"><div class="filter-label">Severity scenario</div>
+        <select class="filter-select" id="f-sevscenario"><option>Business as usual</option><option>Pragmatic mitigations</option></select></div>
+      </div>
+      <div id="panel-sectors" style="display:none;">
+        <div class="panel-title">Sector view</div>
+        <div class="filter-group"><div class="filter-label">Sort companies</div>
+          <select class="filter-select" id="p-sec-cosort"><option value="az">Name (A–Z)</option><option value="cov-desc">Coverage (high to low)</option><option value="cov-asc">Coverage (low to high)</option></select></div>
+        <div class="filter-group"><div class="filter-label">Sort risks</div>
+          <select class="filter-select" id="p-sec-risksort"><option value="vuln">Vulnerability (high to low)</option><option value="cov-desc">Coverage (high to low)</option><option value="cov-asc">Coverage (low to high)</option></select></div>
+        <div class="filter-label" style="margin-top:12px;line-height:1.4;">Open a sector card to apply these.</div>
+      </div>
+      <div id="panel-none" style="display:none;">
+        <div class="panel-title">View</div>
+        <div class="filter-label" style="line-height:1.4;">This view has its own controls inline.</div>
+      </div>
+    </aside>
+    <main class="center" id="center-main">
+      <div class="center-header"><h2 id="center-title">Companies × risks</h2>
+        <div class="tabs" id="tabs-bar"><div class="chip active" data-tab="matrix">Home</div><div class="chip" data-tab="sectors">Sectors</div><div class="chip" data-tab="risks">Risks</div><div class="chip" data-tab="companies">Companies</div><div class="chip" data-tab="documents">Documents</div><div class="chip" data-tab="compare">Compare</div><div class="chip" data-tab="guide">About</div></div>
+      </div>
+      <div id="center-body"></div>
+    </main>
+    <aside class="panel" id="detail"><div class="detail-placeholder">Click a cell for its disclosure and significance. Click a company or a risk name to drill in.</div></aside>
+  </div>
+</div>
+<script>
+(function(){
+// All data is loaded from ./data.json at startup (see applyData at the bottom).
+// These are the derived, index-based shapes the views use; risk index `r` keys everything.
+var risks=[];        // risk short names, index = r
+var riskNums=[];     // risk number per index, e.g. "6.6"
+var riskPlain=[];    // plain-language description per index (from taxonomy Description)
+var riskDomain=[];   // domain name per index
+var numToIndex={};   // "6.6" -> index
+var domains=[];      // [{name, risks:[indices]}], 7 domains in order
+var N=0;
+// Band thresholds + significance on the 0-4 Mean_Score scale (single config point).
+var BAND={extreme:4,high:3,moderate:2};  // median category (0-4): 4 Extreme, 3 High, 2 Moderate, <=1 Lower
+var SIG_MIN=BAND.high; // a lens counts toward significance at >= High (2 of 4)
+// Shorter labels for the matrix domain band (narrow spans); full name stays in the tooltip.
+var SHORT_DOMAIN={'Human-Computer Interaction':'Human-AI Interaction'};
+// Inline line icons (monochrome, inherit colour via currentColor) for sectors + risk domains.
+function svgIcon(inner){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';}
+var SECTOR_ICON={
+ 'Finance':'<path d="M3 9l9-5 9 5"/><path d="M5 9v8M9 9v8M15 9v8M19 9v8"/><path d="M3 20h18"/>',
+ 'Healthcare':'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>',
+ 'Information':'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/>',
+ 'Agriculture':'<path d="M12 20V9"/><path d="M12 12c0-3 2-5 6-5 0 3-2 5-6 5z"/><path d="M12 15c0-3-2-5-6-5 0 3 2 5 6 5z"/>',
+ 'Trade':'<path d="M3 6h11v9H3z"/><path d="M14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/>',
+ 'Real Estate':'<path d="M4 11l8-6 8 6"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
+ 'Accommodation':'<path d="M2 17V7"/><path d="M2 11h14a4 4 0 0 1 4 4v2"/><path d="M2 17h20"/><path d="M6 11V9h5v2"/>',
+ 'Management':'<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/>',
+ 'Professional':'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 12h6M9 16h4"/>',
+ 'Arts':'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-2 0-1.3 1-2 2.3-2H19a2 2 0 0 0 2-2 7 7 0 0 0-9-10z"/><circle cx="8.5" cy="11" r="1"/><circle cx="12" cy="8.5" r="1"/><circle cx="15.5" cy="11" r="1"/>',
+ 'Education':'<path d="M12 4L2 9l10 5 10-5-10-5z"/><path d="M6 11v5c0 1 3 2 6 2s6-1 6-2v-5"/>',
+ 'National Security':'<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6l8-3z"/>',
+ 'Public Administration':'<path d="M6 21V4"/><path d="M6 5h11l-2 3 2 3H6"/>',
+ 'Scientific':'<path d="M9 3h6"/><path d="M10 3v6l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V3"/><path d="M8 15h8"/>'
+};
+var DOMAIN_ICON={
+ 'Discrimination & Toxicity':'<path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-2.5 5h5z"/><path d="M19 7l-2.5 5h5z"/><path d="M9 21h6"/>',
+ 'Privacy & Security':'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.2"/>',
+ 'Misinformation':'<path d="M5 5h14v10h-9l-5 4V5z"/><path d="M12 8v3M12 13v.5"/>',
+ 'Malicious Actors & Misuse':'<path d="M12 3l9 16H3z"/><path d="M12 9v5M12 16.5v.5"/>',
+ 'Human-Computer Interaction':'<path d="M6 3l4 16 2.2-6.2L18 11 6 3z"/>',
+ 'Socioeconomic & Environmental':'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3.2 2.6 3.2 15.4 0 18M12 3c-3.2 2.6-3.2 15.4 0 18"/>',
+ 'AI System Safety Failures and Limitations':'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2M5.2 5.2l2.3 2.3M16.5 16.5l2.3 2.3M18.8 5.2l-2.3 2.3M7.5 16.5l-2.3 2.3"/>'
+};
+function sectorIcon(name){return svgIcon(SECTOR_ICON[name]||'<circle cx="12" cy="12" r="8"/><path d="M9 12h6M12 9v6"/>');}
+function domainIcon(name){return svgIcon(DOMAIN_ICON[name]||'<circle cx="12" cy="12" r="3"/>');}
+var TIP={
+ vuln:'Sector vulnerability: how exposed experts judge this sector to be to this risk. Varies by sector.',
+ resp:'Role responsibility: how much a company in this role (developer, deployer, infrastructure, user) is expected to act on this risk. Varies by role.',
+ sev:'Risk severity: how harmful experts judge this risk to be overall, regardless of company or sector. Same for every company.',
+ sig:'Where risk severity, sector vulnerability, and actor responsibility converge on one company. Each is an independent reason to expect engagement; together, silence is harder to read as the risk not applying.',
+ cov:'Coverage: how much is actually disclosed. For a sector, the share of its companies that disclose the risk. for a company, the share of the 24 risks it discloses.',
+ docs:'Documents reviewed: the number of public documents, such as annual reports, ESG and AI governance materials, reviewed across the companies in this sector.'
+};
+function tip(term,key){return '<span class="tip" data-tip="'+TIP[key]+'">'+term+'</span>';}
+// Two expert-rating lenses, 0-4, keyed [name][riskIndex]; filled by applyData.
+var sectorVuln={};   // {sector: [score per risk index]}
+var actorResp={};    // {actor:  [score per risk index]}
+var sectors=[];      // [{name, cos:[{n,actor,sector,docs,ack:[idx],cell:{idx:{...}}}]}]
+var sectorDef={};    // {sector: definition text}
+var severityByScenario={businessAsUsual:[],pragmaticMitigations:[]}; // sev[scenario][riskIndex], 0-4
+var ACTORS=[];       // actor names present (for the compare filters)
+var A={risk:0,sector:null,company:null,compare:[]}; // tour/guide demo anchors (set in computeAnchors)
+function band(v){if(v==null)return['No data','vx-low'];if(v>=BAND.extreme)return['Extreme','vx-extreme'];if(v>=BAND.high)return['High','vx-high'];if(v>=BAND.moderate)return['Moderate','vx-mod'];return['Lower','vx-low'];}
+function vCell(v){return v==null?'mvnd':'mv'+v;}
+function idxAll(){var a=[];for(var i=0;i<N;i++)a.push(i);return a;}
+function vulnAt(sector,r){var m=sectorVuln[sector];return m&&m[r]!=null?m[r]:null;}
+function respAt(actor,r){var m=actorResp[actor];return m&&m[r]!=null?m[r]:null;}
+function sevAt(r){var m=severityByScenario[state.sevScenario];return m&&m[r]!=null?m[r]:null;}
+// A cell is "significant" where all three expert lenses converge at High+ (>=2 of 4).
+function significant(co,r){var s=sevAt(r),v=vulnAt(co.sector,r),a=respAt(co.actor,r);return s!=null&&s>=SIG_MIN&&v!=null&&v>=SIG_MIN&&a!=null&&a>=SIG_MIN;}
+function combo(co,r){return (sevAt(r)||0)+(vulnAt(co.sector,r)||0)+(respAt(co.actor,r)||0);}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var state={sig:true,sector:'All',actor:'All',sort:'cov-desc',tab:'matrix',rowsel:null,colsel:null,cellsel:null,cmp:[],secView:null,riskView:null,colmode:'domain',sevScenario:'businessAsUsual',secSort:{key:'vuln',dir:'desc'},secCoSort:'cov-desc',rvExpanded:{},rvCell:null,rvRow:null,coSearch:'',coSort:'sector',coView:null,expanded:{},cmpSec:[],cmpActor:[]};
+function sortCos(arr,s){
+  s=s||state.sort;
+  return arr.slice().sort(function(a,b){
+    if(s==='cov-desc')return (b.ack.length-a.ack.length)||a.n.localeCompare(b.n);
+    if(s==='cov-asc') return (a.ack.length-b.ack.length)||a.n.localeCompare(b.n);
+    return a.n.localeCompare(b.n);
+  });
+}
+var grid,detail=document.getElementById('detail'),cbody=document.getElementById('center-body'),ctitle=document.getElementById('center-title');
+// Instant hover tooltip for matrix cells (headers show only risk numbers, so reveal the name on hover).
+var mxtip=document.createElement('div');mxtip.id='mx-tip';mxtip.style.display='none';document.body.appendChild(mxtip);
+function mxTipMove(e){
+  var el=e.target&&e.target.closest?e.target.closest('[data-cell],[data-seccell],[data-col],[data-cojump]'):null;
+  if(!el){mxtip.style.display='none';return;}
+  var html;
+  if(el.hasAttribute('data-cojump')){
+    var rj=+el.getAttribute('data-cojump');
+    html='<b>'+escapeHtml(riskNums[rj]+' '+risks[rj])+'</b><span>'+escapeHtml(riskDomain[rj]||'')+'</span>';
+    if(state.coView){var _ci=findCo(state.coView);if(_ci){var _co=_ci.co,_sec=_ci.sector,_v=vulnAt(_sec,rj),_a=_co.actor?respAt(_co.actor,rj):null,_d=_co.ack.indexOf(rj)!==-1;html+='<span>Vulnerability: '+(_v==null?'\u2014':band(_v)[0])+' \u00b7 Responsibility: '+(_a==null?'\u2014':band(_a)[0])+'</span><span>'+escapeHtml(_sec+' \u00b7 '+(_co.actor||'no role'))+' \u00b7 '+(_d?'discloses':'silent')+'</span>';}}
+  }else if(el.hasAttribute('data-col')){
+    var rc=+el.getAttribute('data-col');
+    html='<b>'+escapeHtml(riskNums[rc]+' '+risks[rc])+'</b><span>'+escapeHtml(riskDomain[rc]||'')+'</span>';
+  }else if(el.hasAttribute('data-cell')){
+    var p=el.getAttribute('data-cell').split('|'),r=+p[1],info=findCo(p[0]);
+    var ackd=info&&info.co.cell[r]&&info.co.cell[r].disclosed;
+    html='<b>'+escapeHtml(riskNums[r]+' '+risks[r])+'</b><span>'+escapeHtml(p[0])+' · '+(ackd?'discloses':'no disclosure')+'</span>';
+  }else{
+    var q=el.getAttribute('data-seccell').split('|'),r2=+q[1];
+    html='<b>'+escapeHtml(riskNums[r2]+' '+risks[r2])+'</b><span>'+escapeHtml(q[0])+' · sector</span>';
+  }
+  mxtip.innerHTML=html;mxtip.style.display='block';
+  var x=e.clientX+14,y=e.clientY+14;
+  if(x+mxtip.offsetWidth>window.innerWidth-8)x=e.clientX-mxtip.offsetWidth-14;
+  if(y+mxtip.offsetHeight>window.innerHeight-8)y=e.clientY-mxtip.offsetHeight-14;
+  mxtip.style.left=x+'px';mxtip.style.top=y+'px';
+}
+cbody.addEventListener('mousemove',mxTipMove);
+cbody.addEventListener('mouseleave',function(){mxtip.style.display='none';});
+
+function colOrder(){
+  if(state.sector!=='All'&&sectorVuln[state.sector]){var v=sectorVuln[state.sector];return idxAll().sort(function(a,b){return (v[b]||0)-(v[a]||0);});}
+  return idxAll().sort(function(a,b){return (sevAt(b)||0)-(sevAt(a)||0);});
+}
+function visibleCos(){var list=[];sectors.forEach(function(s){if(state.sector!=='All'&&s.name!==state.sector)return;s.cos.forEach(function(c){if(state.actor!=='All'&&c.actor!==state.actor)return;list.push({co:c,sector:s.name});});});return list;}
+function cellState(co,r){var ack=co.ack.indexOf(r)!==-1;var hi=significant(co,r);if(hi&&ack)return'hiack';if(hi&&!ack)return'hino';if(!hi&&ack)return'loack';return'lono';}
+function findCo(name){var f=null;sectors.forEach(function(s){s.cos.forEach(function(c){if(c.n===name)f={co:c,sector:s.name};});});return f;}
+function sigLevel(co,r){var s=sevAt(r),v=vulnAt(co.sector,r),a=respAt(co.actor,r),hits=0;if(s!=null&&s>=SIG_MIN)hits++;if(v!=null&&v>=SIG_MIN)hits++;if(a!=null&&a>=SIG_MIN)hits++;if(hits>=3)return'High';if(hits>=1)return'Moderate';return'Low';}
+function gapScore(co){var g=0;for(var r=0;r<N;r++){if(significant(co,r)&&co.ack.indexOf(r)===-1)g++;}return g;}
+function coveredScore(co){var c=0;for(var r=0;r<N;r++){if(significant(co,r)&&co.ack.indexOf(r)!==-1)c++;}return c;}
+
+function matrixColOrder(){
+  // Default: grouped by the seven domains. "Ordered by severity": flat, most severe first.
+  // "By sector vulnerability": flat by the selected sector's vulnerability (needs a sector).
+  if(state.colmode==='severity'){
+    return {flat:idxAll().sort(function(a,b){return (sevAt(b)||0)-(sevAt(a)||0);}),grouped:null};
+  }
+  if(state.colmode==='vuln'&&state.sector!=='All'&&sectorVuln[state.sector]){
+    var v=sectorVuln[state.sector];
+    return {flat:idxAll().sort(function(a,b){return (v[b]||0)-(v[a]||0);}),grouped:null};
+  }
+  var groups=domains.map(function(d){return {name:d.name,risks:d.risks.slice()};});
+  var flat=[];groups.forEach(function(g){g.risks.forEach(function(r){flat.push(r);});});
+  return {flat:flat,grouped:groups};
+}
+function secCos(sn){var cos=[];sectors.forEach(function(s){if(s.name===sn)cos=s.cos;});return cos;}
+function sectorCoverage(sn,r){
+  var cos=secCos(sn);
+  if(!cos.length)return null;
+  var n=0;cos.forEach(function(c){if(c.ack.indexOf(r)!==-1)n++;});
+  return n/cos.length;
+}
+function sectorDocs(sn){
+  var d=0;secCos(sn).forEach(function(c){d+=c.docs||0;});
+  return d;
+}
+function renderMatrix(){
+  ctitle.textContent='';
+  var co=matrixColOrder(), order=co.flat;
+  var html='';
+  
+  // build column-count and template
+  var ncol=order.length;
+  var tmpl='150px 38px 46px repeat('+ncol+',minmax(46px,1fr))';
+  html+='<div class="mx" style="grid-template-columns:'+tmpl+';">';
+  // top banner: Sectors (rows) x Risks (columns)
+  html+='<div class="mx-axis" style="grid-column:span 3;">Sectors</div><div class="mx-axis" style="grid-column:span '+ncol+';">Risks</div>';
+  // domain header row (only in domain mode)
+  if(co.grouped){
+    html+='<div class="mx-dh"></div><div class="mx-dh"></div><div class="mx-dh"></div>';
+    co.grouped.forEach(function(g,gi){
+      html+='<div class="mx-domain'+(gi===co.grouped.length-1?' mx-domain-last':'')+'" title="'+g.name+'" style="grid-column:span '+g.risks.length+';">'+(SHORT_DOMAIN[g.name]||g.name)+'</div>';
+    });
+  }
+  var domStart={},domEnd={};
+  if(co.grouped){var _pd=null;order.forEach(function(r){if(riskDomain[r]!==_pd){domStart[r]=true;_pd=riskDomain[r];}});domEnd[order[order.length-1]]=true;}
+  // column header row: company label, Cov, Docs, then risk short numbers
+  html+='<div class="mx-h mx-h-co"></div><div class="mx-h mx-h-c">'+tip('Cov','cov')+'</div><div class="mx-h mx-h-c">'+tip('Docs','docs')+'</div>';
+  order.forEach(function(r){
+    var cs=state.colsel===r?' colsel':'';
+    html+='<div class="mx-h mx-risk'+cs+(domStart[r]?' mx-dstart':'')+(domEnd[r]?' mx-dend':'')+'" data-col="'+r+'" title="'+riskNums[r]+'  '+risks[r]+'">'+riskNums[r]+'</div>';
+  });
+  // sector rows
+  var secNames=Object.keys(sectorVuln);
+  // optionally filter to one sector
+  if(state.sector!=='All')secNames=secNames.filter(function(s){return s===state.sector;});
+  secNames.sort(function(a,b){var ca=order.map(function(r){return sectorCoverage(a,r);}).filter(function(v){return v!==null;});var cb=order.map(function(r){return sectorCoverage(b,r);}).filter(function(v){return v!==null;});var ma=ca.length?ca.reduce(function(x,y){return x+y;},0)/ca.length:0;var mb=cb.length?cb.reduce(function(x,y){return x+y;},0)/cb.length:0;return (state.sort==='cov-asc')?(ma-mb):(mb-ma);});
+  secNames.forEach(function(sn){
+    var vuln=sectorVuln[sn];
+    var cosList=[];sectors.forEach(function(s){if(s.name===sn)cosList=s.cos;});
+    var nco=cosList.length;
+    // sector overall coverage: avg of per-risk coverage across significant risks
+    var covVals=order.map(function(r){return sectorCoverage(sn,r);}).filter(function(v){return v!==null;});
+    var covAvg=covVals.length?Math.round(covVals.reduce(function(a,b){return a+b;},0)/covVals.length*100):0;
+    var exp=!!state.expanded[sn];
+    html+='<div class="mx-sec'+(exp?' open':'')+'" data-exptog="'+sn+'"><span class="mx-tri">\u25b8</span><span class="mx-secname">'+sn+'</span><span class="mx-seccount">('+nco+')</span></div>';
+    html+='<div class="mx-cov">'+covAvg+'%</div><div class="mx-cov mx-docs">'+sectorDocs(sn)+'</div>';
+    order.forEach(function(r){
+      var v=vuln[r];
+      var cov=sectorCoverage(sn,r);
+      var pct=cov===null?null:Math.round(cov*100);
+      var cls='mx-cell '+vCell(v)+(domStart[r]?' mx-dstart':'')+(domEnd[r]?' mx-dend':'');
+      if(state.colsel!==null&&state.colsel!==r)cls+=' dim';
+      var label=(pct===null||pct===0)?'\u2014':pct+'%';
+      html+='<div class="'+cls+'" data-seccell="'+sn+'|'+r+'">'+label+'</div>';
+    });
+    // expanded company rows
+    if(exp){
+      var arr=sortCos(cosList.filter(function(c){return state.actor==='All'||c.actor===state.actor;}));
+      arr.forEach(function(c){
+        html+='<div class="mx-co" data-row="'+c.n+'"><span class="mx-co-name">'+c.n+'</span><span class="mx-co-role">'+(c.actor||'role n/a')+'</span></div>';
+        html+='<div class="mx-cov mx-co-cov">'+Math.round(c.ack.length/N*100)+'%</div><div class="mx-cov mx-co-cov">'+(c.docs||0)+'</div>';
+        order.forEach(function(r){
+          var ackd=c.ack.indexOf(r)!==-1;
+          var cls='mx-cell mx-cocell '+(ackd?'co-yes':'co-no')+(domStart[r]?' mx-dstart':'')+(domEnd[r]?' mx-dend':'');
+          if(state.colsel!==null&&state.colsel!==r)cls+=' dim';
+          if(state.cellsel&&state.cellsel.co===c.n&&state.cellsel.r===r)cls+=' selected';
+          var glyph=ackd?'\u2713':'';
+          html+='<div class="'+cls+'" data-cell="'+c.n+'|'+r+'">'+glyph+'</div>';
+        });
+      });
+    }
+  });
+  html+='</div>';
+  html+='<div class="mx-legend"><span><b>Cell colour:</b> '+tip('sector vulnerability','vuln')+' (experts\u2019 rating) <span class="mx-leg-sw mv4"></span>Extremely<span class="mx-leg-sw mv3"></span>Highly<span class="mx-leg-sw mv2"></span>Moderately<span class="mx-leg-sw mv1"></span>Minimally<span class="mx-leg-sw mv0"></span>Not at all</span></div>';
+  cbody.innerHTML=html;grid=cbody;
+  grid.querySelectorAll('[data-exptog]').forEach(function(el){el.addEventListener('click',function(){var sn=el.getAttribute('data-exptog');state.expanded[sn]=!state.expanded[sn];renderMatrix();});});
+  grid.querySelectorAll('[data-cell]').forEach(function(el){el.addEventListener('click',function(){var p=el.getAttribute('data-cell').split('|');selectCell(p[0],parseInt(p[1]));});});
+  grid.querySelectorAll('[data-row]').forEach(function(el){el.addEventListener('click',function(){selectRow(el.getAttribute('data-row'));});});
+  grid.querySelectorAll('[data-col]').forEach(function(el){el.addEventListener('click',function(){selectCol(parseInt(el.getAttribute('data-col')));});});
+  grid.querySelectorAll('[data-seccell]').forEach(function(el){el.addEventListener('click',function(){var p=el.getAttribute('data-seccell').split('|');openSectorHeatmap(p[0]);});});
+}
+
+function sectorAckRate(sn){var cos=secCos(sn);return idxAll().map(function(r){var n=0;cos.forEach(function(c){if(c.ack.indexOf(r)!==-1)n++;});return cos.length?n/cos.length:0;});}
+function renderSectors(){
+  ctitle.textContent='';
+  if(state.secView){renderSectorHeatmap(state.secView);return;}
+  function covAvg(sn){var a=sectorAckRate(sn);return a.length?Math.round(a.reduce(function(x,y){return x+y;},0)/a.length*100):0;}
+  var names=Object.keys(sectorVuln).slice().sort(function(a,b){return covAvg(b)-covAvg(a);});
+  var h='<div class="page-hero">Sectors</div><div class="sec-intro">The sectors we reviewed, ordered by how much of each one discloses on average. Click a sector to open its full risk profile, risk by risk, and see which companies disclose each.</div>';
+  h+='<table class="risk-tbl"><thead><tr><th>Sector</th><th>Description</th><th class="risk-tbl-cov-h">Companies</th><th class="risk-tbl-cov-h">Disclosed</th></tr></thead><tbody>';
+  names.forEach(function(sn){
+    h+='<tr class="risk-tbl-row" data-sec="'+sn+'"><td class="risk-tbl-name"><span class="rtl-link">'+sn+'</span> <span class="rtl-arr">\u203a</span></td><td class="risk-tbl-desc">'+escapeHtml(sectorDef[sn]||'')+'</td><td class="risk-tbl-cov">'+secCos(sn).length+'</td><td class="risk-tbl-cov">'+covAvg(sn)+'%</td></tr>';
+  });
+  h+='</tbody></table>';
+
+  cbody.innerHTML=h;
+  cbody.querySelectorAll('[data-sec]').forEach(function(el){el.addEventListener('click',function(){state.secView=el.getAttribute('data-sec');renderSectorHeatmap(state.secView);});});
+}
+function renderSectorHeatmap(sn){
+  ctitle.textContent=sn;
+  var v=sectorVuln[sn],ack=sectorAckRate(sn);
+  var cos=sortCos(secCos(sn),state.secCoSort);
+  var ss=state.secSort,dir=ss.dir==='asc'?1:-1;
+  var order=idxAll().sort(function(a,b){
+    if(ss.key==='cov'){var ca=ack[a]||0,cb=ack[b]||0;if(ca!==cb)return (ca-cb)*dir;return (v[b]||0)-(v[a]||0);}
+    var va=v[a]||0,vb=v[b]||0;if(va!==vb)return (va-vb)*dir;return a-b;
+  });
+  var caret=function(k){return ss.key===k?(ss.dir==='asc'?' ▲':' ▼'):'';};
+  var h='<div class="sec-back" id="sec-back">‹ All sectors</div>';
+  if(sectorDef&&sectorDef[sn])h+='<div class="sec-detaildef">'+escapeHtml(sectorDef[sn])+'</div>';
+  var sumAll=secCos(sn);
+  var sumGaps=idxAll().filter(function(i){return v[i]!=null&&v[i]>=2&&(ack[i]||0)<0.5;}).sort(function(a,b){return (v[b]-v[a])||((ack[a]||0)-(ack[b]||0));}).slice(0,3);
+  var sumLead=sumAll.slice().filter(function(c){return c.ack.length>0;}).sort(function(a,b){return b.ack.length-a.ack.length;}).slice(0,3);
+  var sumEx=[],sumUsed={};
+  sumLead.forEach(function(c){
+    if(sumEx.length>=3)return;
+    var idxs=Object.keys(c.cell).map(Number).filter(function(i){return c.cell[i].disclosed&&c.cell[i].note;}).sort(function(a,b){return (v[b]||0)-(v[a]||0);});
+    var gi=idxs.filter(function(i){return !sumUsed[i];})[0];
+    if(gi==null)gi=idxs[0];
+    if(gi!=null){sumUsed[gi]=1;sumEx.push({co:c.n,risk:risks[gi],note:c.cell[gi].note});}
+  });
+  h+='<div class="shm" style="grid-template-columns:166px 116px 74px repeat('+cos.length+',34px);">';
+  h+='<div class="shm-axis">Risks</div>';
+  h+='<div class="shm-axis shm-sorth" data-secsort="vuln" style="cursor:pointer;">'+tip('Sector vulnerability','vuln')+caret('vuln')+'</div>';
+  h+='<div class="shm-axis shm-sorth" data-secsort="cov" style="cursor:pointer;">'+tip('Sector coverage','cov')+caret('cov')+'</div>';
+  h+='<div class="shm-axis" style="grid-column:span '+cos.length+';">'+tip('Company coverage','cov')+'</div>';
+  h+='<div class="shm-corow-lbl" style="grid-column:span 3;"></div>';
+  cos.forEach(function(c){h+='<div class="shm-h shm-co" data-shmco="'+c.n+'" title="'+c.n+' \u2014 open profile">'+c.n+'</div>';});
+  h+='<div class="shm-corow-lbl" style="grid-column:span 3;"></div>';
+  cos.forEach(function(c){h+='<div class="shm-cocov" title="'+c.n+': discloses '+c.ack.length+' of '+N+' risks">'+Math.round(c.ack.length/N*100)+'%</div>';});
+  order.forEach(function(r){
+    var vl=band(v[r]);var cov=Math.round((ack[r]||0)*100);
+    h+='<div class="shm-risk" data-srisk="'+r+'">'+risks[r]+'</div>';
+    h+='<div class="shm-sig '+vl[1]+'">'+vl[0]+'</div>';
+    h+='<div class="shm-cov">'+(cov>0?cov+'%':'—')+'</div>';
+    cos.forEach(function(c){var ackd=c.ack.indexOf(r)!==-1;var cls='shm-cell '+(ackd?'yes':'no');h+='<div class="'+cls+'" data-shmcell="'+c.n+'|'+r+'" title="'+c.n+' · '+risks[r]+'">'+(ackd?'✓':'')+'</div>';});
+  });
+  h+='</div>';
+  h+='<div class="shm-legend"><span><span class="sw shm-sw-yes"></span>Discloses</span><span><span class="sw shm-sw-no"></span>No disclosure</span></div>';
+  h+='<div class="sec-summary">';
+  h+='<div class="sec-sum-h">Key gaps</div>';
+  h+=sumGaps.length?('<div class="sec-sum-p">Fewer than half of '+sn+' companies disclose '+sumGaps.map(function(i){return '<b>'+risks[i]+'</b> ('+Math.round((ack[i]||0)*100)+'% disclose, '+band(v[i])[0].toLowerCase()+' vulnerability)';}).join('; ')+'.</div>'):'<div class="sec-sum-p">This sector discloses most of the risks it is materially exposed to.</div>';
+  if(sumLead.length){
+    h+='<div class="sec-sum-h">Most-disclosing companies</div><div class="sec-sum-p">'+sumLead.map(function(c){return '<b>'+c.n+'</b> ('+Math.round(c.ack.length/N*100)+'%)';}).join(', ')+' disclose the most of the 24 risks.</div>';
+    if(sumEx.length){h+='<ul class="sec-sum-ex">'+sumEx.map(function(e){var nt=e.note.length>170?e.note.slice(0,170).replace(/\s+\S*$/,'')+'…':e.note;return '<li>'+e.co+' — '+e.risk+': “'+escapeHtml(nt)+'”</li>';}).join('')+'</ul>';}
+  }
+  h+='</div>';
+  cbody.innerHTML=h;
+  document.getElementById('sec-back').addEventListener('click',function(){state.secView=null;renderSectors();});
+  cbody.querySelectorAll('[data-shmcell]').forEach(function(el){el.addEventListener('click',function(){var pp=el.getAttribute('data-shmcell').split('|');selectCell(pp[0],parseInt(pp[1]));});});
+  cbody.querySelectorAll('[data-shmco]').forEach(function(el){el.addEventListener('click',function(){var nm=el.getAttribute('data-shmco');switchTab('companies');state.coView=nm;renderCompanyProfile(nm);});});
+  cbody.querySelectorAll('[data-srisk]').forEach(function(el){el.addEventListener('click',function(){selectCol(parseInt(el.getAttribute('data-srisk')));});});
+  cbody.querySelectorAll('[data-secsort]').forEach(function(el){el.addEventListener('click',function(){var k=el.getAttribute('data-secsort');if(state.secSort.key===k)state.secSort.dir=state.secSort.dir==='asc'?'desc':'asc';else{state.secSort.key=k;state.secSort.dir=k==='cov'?'asc':'desc';}renderSectorHeatmap(sn);});});
+  updatePanel();
+}
+
+function renderRisks(){
+  ctitle.textContent='';
+  var allCo=[];sectors.forEach(function(sx){sx.cos.forEach(function(c){allCo.push(c);});});
+  var total=allCo.length||1;
+  function cov(r){var n=0;allCo.forEach(function(c){if(c.ack.indexOf(r)!==-1)n++;});return Math.round(n/total*100);}
+  var h='<div class="page-hero">Risks</div><div class="sec-intro">The AI Risk Repository taxonomy: 24 risks across seven domains. Each row shows the share of companies that disclose it &mdash; click any risk for the full breakdown by sector and role.</div>';
+  h+='<table class="risk-tbl"><thead><tr><th>Domain / Subdomain</th><th>Description</th><th class="risk-tbl-cov-h">Disclosed</th></tr></thead><tbody>';
+  domains.forEach(function(dom,di){
+    if(!dom.risks.length)return;
+    h+='<tr class="risk-tbl-domain"><td colspan="3">'+(di+1)+' '+dom.name+'</td></tr>';
+    dom.risks.forEach(function(r){
+      h+='<tr class="risk-tbl-row" data-risk="'+r+'"><td class="risk-tbl-name"><b>'+riskNums[r]+'</b> <span class="rtl-link">'+risks[r]+'</span> <span class="rtl-arr">›</span></td><td class="risk-tbl-desc">'+escapeHtml(riskPlain[r])+'</td><td class="risk-tbl-cov">'+cov(r)+'%</td></tr>';
+    });
+  });
+  h+='</tbody></table>';
+  cbody.innerHTML=h;
+  cbody.querySelectorAll("[data-risk]").forEach(function(el){el.addEventListener("click",function(){state.riskView=parseInt(el.getAttribute("data-risk"));renderRiskView(state.riskView);});});
+}
+
+function renderCompanies(){
+  ctitle.textContent='';
+  if(state.coView){renderCompanyProfile(state.coView);return;}
+  var list=[];sectors.forEach(function(sx){sx.cos.forEach(function(c){list.push(c);});});
+  var total=list.length;
+  var q=(state.coSearch||'').toLowerCase();
+  if(q)list=list.filter(function(c){return c.n.toLowerCase().indexOf(q)!==-1||(c.sector||'').toLowerCase().indexOf(q)!==-1||(c.actor||'').toLowerCase().indexOf(q)!==-1;});
+  list.sort(function(a,b){
+    if(state.coSort==='name')return a.n.localeCompare(b.n);
+    if(state.coSort==='cov-asc')return (a.ack.length-b.ack.length)||a.n.localeCompare(b.n);
+    if(state.coSort==='sector')return (a.sector||'').localeCompare(b.sector||'')||a.n.localeCompare(b.n);
+    return (b.ack.length-a.ack.length)||a.n.localeCompare(b.n);
+  });
+  var opts=[['sector','Sector'],['cov-desc','Coverage (high to low)'],['cov-asc','Coverage (low to high)'],['name','Name (A–Z)']];
+  var h='<div class="page-hero">Companies</div><div class="cmp-intro">All '+total+' companies — search or sort, then click one to open its full profile.</div>';
+  h+='<div class="co-controls"><input type="text" id="co-search" class="co-search" placeholder="Search company, sector, or role…" value="'+escapeHtml(state.coSearch||'')+'"><span>Sort</span><select class="filter-select co-sortsel" id="co-sort">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(state.coSort===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select><span class="co-count">'+list.length+' shown</span></div>';
+  if(list.length){
+    h+='<table class="cotbl"><thead><tr><th>Company</th><th>Sector</th><th>Role</th><th class="cotbl-num">Coverage</th></tr></thead><tbody>';
+    var _tints=['#FBE3E3','#FDEBD6','#F6F0CB','#E0F1E0','#DBEAF7','#E9E2F4','#FADCEC','#DCEEEA'];var _bars=['#D66B6B','#E0954A','#C6A83F','#57A65C','#5591C2','#8770B6','#CC699C','#4E9E8E'];var _secord=Object.keys(sectorVuln);function _sti(snm){var i=_secord.indexOf(snm);return i<0?0:i%_tints.length;}
+    var _gsec=null;
+    list.forEach(function(c){
+      if(state.coSort==='sector'&&c.sector!==_gsec){_gsec=c.sector;var _cn=list.filter(function(x){return x.sector===_gsec;}).length;var _ti=_sti(_gsec);h+='<tr class="cotbl-group" style="background:'+_tints[_ti]+'"><td colspan="4" style="border-left:4px solid '+_bars[_ti]+'">'+(_gsec||'Unclassified')+'<span class="cotbl-group-n">'+_cn+'</span></td></tr>';}
+      h+='<tr data-corow="'+c.n+'"'+(state.rowsel===c.n?' class="sel"':'')+'><td class="cotbl-co"'+(state.coSort==='sector'?' style="border-left:4px solid '+_bars[_sti(c.sector)]+'"':'')+'>'+c.n+'</td><td class="cotbl-mut">'+(c.sector||'—')+'</td><td class="cotbl-mut">'+(c.actor||'Role n/a')+'</td><td class="cotbl-num">'+Math.round(c.ack.length/N*100)+'%</td></tr>';
+    });
+    h+='</tbody></table>';
+  } else h+='<div class="detail-placeholder">No companies match your search.</div>';
+  cbody.innerHTML=h;
+  var se=document.getElementById('co-search');
+  if(se)se.addEventListener('input',function(e){state.coSearch=e.target.value;renderCompanies();var el=document.getElementById('co-search');if(el){el.focus();var n=el.value.length;el.setSelectionRange(n,n);}});
+  var so=document.getElementById('co-sort');
+  if(so)so.addEventListener('change',function(e){state.coSort=e.target.value;renderCompanies();});
+  cbody.querySelectorAll('[data-corow]').forEach(function(el){el.addEventListener('click',function(){state.coView=el.getAttribute('data-corow');renderCompanyProfile(state.coView);});});
+}
+
+function renderCompanyProfile(name){
+  ctitle.textContent=name;
+  var info=findCo(name); if(!info){state.coView=null;renderCompanies();return;}
+  var co=info.co, sector=info.sector, disclosed=co.ack.length;
+  var wsite=co.website||'', whref=wsite.indexOf('http')===0?wsite:'https://'+wsite;
+  var logo=co.logo?'<img class="cp-logo" src="'+co.logo+'" alt="" onerror="this.remove()">':'';
+  var h='<div class="sec-back" id="co-back">‹ All companies</div>';
+  h+='<div class="cp-head">'+logo+'<div class="cp-head-txt"><div class="cp-name">'+name+'</div><div class="cp-subline">'+sector+(co.ticker?' · '+co.ticker:'')+' · discloses '+disclosed+' of '+N+' risks</div></div></div>';
+  if(co.description)h+='<div class="cp-desc">'+escapeHtml(co.description)+'</div>';
+  h+='<div class="cp-block cp-shade">';
+  h+='<div class="cp-sec-title">Company details</div>';
+  h+='<div class="cp-meta">';
+  h+='<div class="cp-meta-item"><div class="cp-meta-k">Sector</div><div class="cp-meta-v">'+sector+'</div></div>';
+  h+='<div class="cp-meta-item"><div class="cp-meta-k">AI actor role</div><div class="cp-meta-v">'+(co.actor||'Not classified')+'</div></div>';
+  h+='<div class="cp-meta-item"><div class="cp-meta-k">Industry</div><div class="cp-meta-v">'+(co.industry?escapeHtml(co.industry):'—')+'</div></div>';
+  h+='<div class="cp-meta-item"><div class="cp-meta-k">Headquarters</div><div class="cp-meta-v">'+(co.country?escapeHtml(co.country):'—')+'</div></div>';
+  h+='<div class="cp-meta-item"><div class="cp-meta-k">Market cap</div><div class="cp-meta-v">'+(co.marketCap?escapeHtml(co.marketCap):'—')+'</div></div>';
+  h+='<div class="cp-meta-item"><div class="cp-meta-k">Website</div><div class="cp-meta-v">'+(wsite?'<a href="'+escapeHtml(whref)+'" target="_blank" rel="noopener">'+escapeHtml(wsite)+'</a>':'—')+'</div></div>';
+  h+='<div class="cp-meta-item"><div class="cp-meta-k">Documents reviewed</div><div class="cp-meta-v">'+(co.docs||0)+'</div></div>';
+  h+='<div class="cp-meta-item"><div class="cp-meta-k">Risk coverage</div><div class="cp-meta-v">'+Math.round(disclosed/N*100)+'%</div></div>';
+  h+='</div>';
+  if(co.roleSummary)h+='<div class="cp-rolesum"><div class="cp-rolesum-h">Role in the AI ecosystem</div>'+escapeHtml(co.roleSummary).replace(/\n\n+/g,'<br><br>').replace(/\n/g,' ')+'</div>';
+  h+='</div>';
+  var vLev=[4,3,2,1,0], rLev=[4,3,2,1,0];
+  function vWord(v){return ['Not at all','Minimally','Moderately','Highly','Extremely'][v];}
+  function rWord(v){return ['Not at all','Minimally','Moderately','Highly','Primarily'][v];}
+  h+='<div class="cp-block">';
+  h+='<div class="cp-sec-title">'+name+'’s risk exposure and responsibility</div>';
+  if(co.actor){
+    var bkt={};
+    idxAll().forEach(function(rr){var vv=vulnAt(sector,rr),aa=respAt(co.actor,rr);if(vv==null||aa==null)return;(bkt[vv+'|'+aa]=bkt[vv+'|'+aa]||[]).push(rr);});
+    h+='<div class="cp-mx-intro">Each of the 24 risks placed by how vulnerable '+name+'’s sector is to it (rows) and how responsible its role is for it (columns). A green chip means the company discloses that risk; grey means it stays silent. The red corner marks where both run highest, the risks it is most expected to act on.</div>';
+    h+='<div class="cpm" id="cpm" style="grid-template-columns:106px repeat(5,minmax(0,1fr));">';
+    h+='<div class="cpm-corner"></div>';
+    rLev.forEach(function(a){h+='<div class="cpm-colh cpm-l'+(a+1)+'">'+rWord(a)+'</div>';});
+    vLev.forEach(function(v){
+      h+='<div class="cpm-rowh cpm-l'+(v+1)+'">'+vWord(v)+'</div>';
+      rLev.forEach(function(a){
+        var rs=bkt[v+'|'+a]||[];
+        h+='<div class="cpm-cell'+((v>=3&&a>=3)?' cpm-hot':'')+'">'+rs.map(function(rr){var d=co.ack.indexOf(rr)!==-1;return '<span class="cpm-chip '+(d?'yes':'no')+'" data-cojump="'+rr+'" title="'+escapeHtml(riskNums[rr]+' '+risks[rr])+(d?' — discloses':' — silent')+'">'+riskNums[rr]+'</span>';}).join('')+'</div>';
+      });
+    });
+    h+='</div>';
+    h+='<div class="cpm-legend"><span><span class="cpm-key yes"></span>Discloses</span><span><span class="cpm-key no"></span>Silent</span><span class="cpm-key-num">Chips show the risk number; hover for its name.</span></div>';
+  } else { h+='<div class="cp-ph-box">This company has no AI actor role assigned, so the responsibility lens is unavailable.</div>'; }
+  h+='</div>';
+  h+='<div class="cp-block cp-shade">';
+  h+='<div class="cp-sec-title">Acknowledged risks ('+disclosed+')</div>';
+  if(disclosed){
+    var ackS=co.ack.slice().sort(function(a,b){return a-b;});
+    h+='<div class="cp-risk-list">';
+    ackS.forEach(function(r){h+='<div class="cp-risk-chip" data-cojump="'+r+'"><b>'+riskNums[r]+'</b>'+risks[r]+'</div>';});
+    h+='</div>';
+  } else { h+='<div class="cp-ph-box">This company discloses none of the 24 risks.</div>'; }
+  h+='</div>';
+  h+='<div class="cp-block">';
+  var d2=co.docs2||[];
+  h+='<div class="cp-sec-title">Documents reviewed ('+(d2.length||co.docs||0)+')</div>';
+  if(d2.length){ h+='<div class="cp-docs">'+d2.map(function(dc){var t=escapeHtml(dc.title||'Document');var thumb='<span class="cp-doc-thumb">'+(dc.thumb?'<img src="'+dc.thumb+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</span>';return dc.url?'<a class="cp-doc" href="'+escapeHtml(dc.url)+'" target="_blank" rel="noopener">'+thumb+'<span class="cp-doc-title">'+t+'</span></a>':'<div class="cp-doc">'+thumb+'<span class="cp-doc-title">'+t+'</span></div>';}).join('')+'</div>'; }
+  else { h+='<div class="cp-ph-box">'+(co.docs||0)+' documents reviewed.</div>'; }
+  h+='</div>';
+  cbody.innerHTML=h;
+  (function(){var mm=document.getElementById('cpm');if(!mm)return;requestAnimationFrame(function(){var hot=mm.querySelectorAll('.cpm-hot');if(!hot.length)return;var mr=mm.getBoundingClientRect(),minL=1e9,minT=1e9,maxR=-1e9,maxB=-1e9;hot.forEach(function(c){var r=c.getBoundingClientRect();minL=Math.min(minL,r.left-mr.left);minT=Math.min(minT,r.top-mr.top);maxR=Math.max(maxR,r.left-mr.left+r.width);maxB=Math.max(maxB,r.top-mr.top+r.height);});var z=document.createElement('div');z.className='cpm-bracket';z.style.left=(minL-2)+'px';z.style.top=(minT-2)+'px';z.style.width=(maxR-minL+4)+'px';z.style.height=(maxB-minT+4)+'px';z.innerHTML='<span class="cpm-bracket-tag">Most expected to act</span>';mm.appendChild(z);});})();
+  document.getElementById('co-back').addEventListener('click',function(){state.coView=null;renderCompanies();});
+  cbody.querySelectorAll('[data-cojump]').forEach(function(el){el.addEventListener('click',function(){selectCell(name,parseInt(el.getAttribute('data-cojump')));});});
+}
+
+function renderDocuments(){
+  ctitle.textContent='';
+  var all=[];
+  sectors.forEach(function(s){s.cos.forEach(function(c){(c.docs2||[]).forEach(function(dc){all.push({co:c.n,title:dc.title||'Document',url:dc.url||'',thumb:dc.thumb||'',type:dc.type||''});});});});
+  var CATS=[['AI Ethics Principles','AI overview & principles','#EEE9F7','#8770B6'],['AI Governance Principles','AI governance','#E1ECF8','#4E86C2'],['ESG Reports','ESG report','#E4F2E4','#57A65C'],['Annual Reports','Annual report','#FCEEDA','#E0954A']];
+  var h='<div class="page-hero">Documents</div><div class="sec-intro">Every reviewed source document, grouped by type. Click a category to expand it, then a document to open the original.</div>';
+  CATS.forEach(function(cat,i){
+    var docs=all.filter(function(d){return d.type===cat[1];}).sort(function(a,b){return a.co.localeCompare(b.co)||a.title.localeCompare(b.title);});
+    h+='<details class="doc-cat"'+(i<2?' open':'')+'><summary class="doc-cat-h" style="background:'+cat[2]+';border-left:4px solid '+cat[3]+'">'+cat[0]+'<span class="doc-cat-n">'+docs.length+'</span></summary><div class="doc-cat-body">';
+    if(docs.length){
+      h+='<div class="cp-docs docs-grid">'+docs.map(function(dc){var thumb='<span class="cp-doc-thumb">'+(dc.thumb?'<img src="'+dc.thumb+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</span>';var body='<span class="cp-doc-body"><span class="cp-doc-title">'+escapeHtml(dc.title)+'</span><span class="cp-doc-type">'+escapeHtml(dc.co)+'</span></span>';return dc.url?'<a class="cp-doc" href="'+escapeHtml(dc.url)+'" target="_blank" rel="noopener">'+thumb+body+'</a>':'<div class="cp-doc">'+thumb+body+'</div>';}).join('')+'</div>';
+    } else { h+='<div class="cp-ph-box">No documents in this category.</div>'; }
+    h+='</div></details>';
+  });
+  cbody.innerHTML=h;
+}
+
+function renderCompare(){
+  ctitle.textContent='';
+  var order=colOrder();
+  var allSectors=Object.keys(sectorVuln);
+  var allActors=[];(function(){var _s={};sectors.forEach(function(x){x.cos.forEach(function(c){if(c.actor)_s[c.actor]=1;});});allActors=Object.keys(_s).sort();})();
+  var CAP=6;
+  // build the pool: every company, narrowed by compare-specific filters
+  var pool=[];
+  sectors.forEach(function(s){
+    if(state.cmpSec.length && state.cmpSec.indexOf(s.name)===-1) return;
+    s.cos.forEach(function(c){
+      if(state.cmpActor.length && state.cmpActor.indexOf(c.actor)===-1) return;
+      pool.push({co:c,sector:s.name});
+    });
+  });
+  var h='<div class="page-hero">Compare</div><div class="cmp-intro">Line up to '+CAP+' companies side by side. Narrow the pool by sector or role, then pick the companies to compare.</div>';
+  // filter bar
+  h+='<div class="cmp-filters">';
+  h+='<div class="cmp-fgroup"><div class="cmp-flabel">Sector</div><div class="cmp-fchips">';
+  allSectors.forEach(function(sn){var on=state.cmpSec.indexOf(sn)!==-1?' on':'';h+='<span class="cmp-fchip'+on+'" data-fsec="'+sn+'">'+sn+'</span>';});
+  h+='</div></div>';
+  h+='<div class="cmp-fgroup"><div class="cmp-flabel">Actor role</div><div class="cmp-fchips">';
+  allActors.forEach(function(a){var on=state.cmpActor.indexOf(a)!==-1?' on':'';h+='<span class="cmp-fchip'+on+'" data-factor="'+a+'">'+a+'</span>';});
+  h+='</div></div>';
+  if(state.cmpSec.length||state.cmpActor.length)h+='<span class="cmp-clearf" id="cmp-clearf">Clear filters</span>';
+  h+='</div>';
+  // selection status
+  h+='<div class="cmp-status"><span>'+state.cmp.length+' of '+CAP+' selected</span>'+(state.cmp.length?'<span class="cmp-clearsel" id="cmp-clearsel">Clear selection</span>':'')+'</div>';
+  // pool, grouped by sector
+  var bySec={};pool.forEach(function(x){(bySec[x.sector]=bySec[x.sector]||[]).push(x.co);});
+  h+='<div class="cmp-pool">';
+  Object.keys(bySec).forEach(function(sn){
+    h+='<div class="cmp-poolsec">'+sn+'</div><div class="cmp-pick">';
+    bySec[sn].forEach(function(c){
+      var on=state.cmp.indexOf(c.n)!==-1?' on':'';
+      var full=state.cmp.length>=CAP&&on==='';
+      h+='<span class="cmp-chip'+on+(full?' disabled':'')+'" data-pick="'+c.n+'">'+c.n+'<span class="cmp-chip-role">'+c.actor+'</span></span>';
+    });
+    h+='</div>';
+  });
+  if(!pool.length)h+='<div class="detail-placeholder">No companies match these filters.</div>';
+  h+='</div>';
+  // comparison grid
+  if(state.cmp.length>=2){
+    var picks=state.cmp.map(findCo);
+    h+='<div class="cmp-gridwrap"><div class="cmp-grid" style="grid-template-columns:170px repeat('+picks.length+',minmax(80px,1fr));">';
+    h+='<div class="cmp-corner"></div>';
+    picks.forEach(function(p){h+='<div class="cmp-co">'+p.co.n+'<span class="cmp-co-sec">'+p.sector+'</span></div>';});
+    order.forEach(function(r){
+      h+='<div class="cmp-rlabel" data-cmprisk="'+r+'" title="'+risks[r]+'">'+risks[r]+'</div>';
+      picks.forEach(function(p){var st=cellState(p.co,r);var g=(st==='hiack'||st==='loack')?'\u2713':(st==='hino'?'\u2715':'');h+='<div class="cmp-cell '+st+'" data-cmpcell="'+p.co.n+'|'+r+'">'+g+'</div>';});
+    });
+    h+='</div></div>';
+  }else{h+='<div class="detail-placeholder">Select at least two companies to see them side by side.</div>';}
+  cbody.innerHTML=h;
+  cbody.querySelectorAll('[data-fsec]').forEach(function(el){el.addEventListener('click',function(){var sn=el.getAttribute('data-fsec');var i=state.cmpSec.indexOf(sn);if(i!==-1)state.cmpSec.splice(i,1);else state.cmpSec.push(sn);renderCompare();});});
+  cbody.querySelectorAll('[data-factor]').forEach(function(el){el.addEventListener('click',function(){var a=el.getAttribute('data-factor');var i=state.cmpActor.indexOf(a);if(i!==-1)state.cmpActor.splice(i,1);else state.cmpActor.push(a);renderCompare();});});
+  var cf=document.getElementById('cmp-clearf');if(cf)cf.addEventListener('click',function(){state.cmpSec=[];state.cmpActor=[];renderCompare();});
+  var cs=document.getElementById('cmp-clearsel');if(cs)cs.addEventListener('click',function(){state.cmp=[];renderCompare();});
+  cbody.querySelectorAll('[data-pick]').forEach(function(el){el.addEventListener('click',function(){var n=el.getAttribute('data-pick');var i=state.cmp.indexOf(n);if(i!==-1)state.cmp.splice(i,1);else if(state.cmp.length<CAP)state.cmp.push(n);renderCompare();});});
+  cbody.querySelectorAll('[data-cmpcell]').forEach(function(el){el.addEventListener('click',function(){var p=el.getAttribute('data-cmpcell').split('|');selectCell(p[0],parseInt(p[1]));});});
+  cbody.querySelectorAll('[data-cmprisk]').forEach(function(el){el.addEventListener('click',function(){selectCol(parseInt(el.getAttribute('data-cmprisk')));});});
+}
+
+function renderRiskView(r){
+  ctitle.textContent=riskNums[r]+' '+risks[r];
+  function coSort(c1,c2){var d1=c1.ack.indexOf(r)!==-1,d2=c2.ack.indexOf(r)!==-1;if(d1!==d2)return d1?-1:1;return c1.n.localeCompare(c2.n);}
+  function coTable(arr,withRole,title){
+    var s='<table class="rvtbl"><thead>'+(title?'<tr class="rvtbl-title"><th colspan="'+(withRole?4:2)+'">'+title+'</th></tr>':'')+'<tr><th>Company</th>'+(withRole?'<th>Role</th><th>Responsibility</th>':'')+'<th class="rvtbl-disc">Discloses</th></tr></thead><tbody>';
+    arr.forEach(function(c){
+      var ackd=c.ack.indexOf(r)!==-1;
+      var role=withRole?'<td class="rvtbl-role">'+(c.actor||'Role n/a')+'</td><td>'+rWord(respAt(c.actor,r))+'</td>':'';
+      s+='<tr data-rvco="'+c.n+'"><td class="rvtbl-co">'+c.n+'</td>'+role+'<td class="rvtbl-disc">'+(ackd?'<span class="rvtbl-yes">✓</span>':'<span class="rvtbl-no">—</span>')+'</td></tr>';
+    });
+    return s+'</tbody></table>';
+  }
+  function roleShort(n){return n.replace('(General-purpose AI)','(General)').replace('(Specialised AI)','(Specialised)');}
+  function vWord(v){return v==null?'No data':['Not at all','Minimally','Moderately','Highly','Extremely'][v];}
+  function rWord(v){return v==null?'No data':['Not at all','Minimally','Moderately','Highly','Primarily'][v];}
+  function lvlClass(v){return v==null?'l0':'l'+(v+1);}
+  function discLevel(pct){if(pct>=85)return 5;if(pct>=65)return 4;if(pct>=45)return 3;if(pct>=25)return 2;if(pct>0)return 1;return 0;}
+  var groups={};
+  visibleCos().forEach(function(x){(groups[x.sector]=groups[x.sector]||[]).push(x.co);});
+  var allCos=visibleCos();
+  var leaders=allCos.filter(function(x){return x.co.ack.indexOf(r)!==-1;}).length;
+  var secNames=Object.keys(groups).sort(function(a,b){return (vulnAt(b,r)||0)-(vulnAt(a,r)||0);});
+  var roleSet={};allCos.forEach(function(x){roleSet[x.co.actor||'—']=1;});
+  var roles=Object.keys(roleSet).map(function(k){return {key:k,name:k==='—'?'Role n/a':roleShort(k),respV:respAt(k==='—'?null:k,r)};}).sort(function(a,b){return (b.respV==null?-1:b.respV)-(a.respV==null?-1:a.respV);});
+  var cellMap={};allCos.forEach(function(x){var k=x.sector+'|'+(x.co.actor||'—');(cellMap[k]=cellMap[k]||[]).push(x.co);});
+  var sel=state.rvCell;
+  var h='<div class="sec-back" id="risk-back">‹ Back to matrix</div>';
+  h+='<div class="plain" style="max-width:800px;">'+riskPlain[r]+'</div>';
+  h+='<details class="rv2-instr"><summary>How to read this</summary><div class="rv2-instr-body">Rows are <b>sectors</b> by '+tip('vulnerability','vuln')+', columns are <b>roles</b> by '+tip('responsibility','resp')+', both highest first, with the level shown once in the coloured row and column. Each cell shows <b>how many of those companies disclose</b> — the greener the cell, the higher the share. The red bracket marks where both run high: the roles most expected to act in the most vulnerable sectors. Click a sector or cell for the companies.</div></details>';
+  var nameW=130,lvlW=102,roleW=100;
+  h+='<div class="rv2-matrix" id="rv2-matrix" style="grid-template-columns:'+nameW+'px '+lvlW+'px repeat('+roles.length+','+roleW+'px);">';
+  h+='<div class="rv2-corner" style="grid-column:span 2;"></div><div class="rv2-axis" style="grid-column:span '+roles.length+';">Responsibility</div>';
+  h+='<div class="rv2-corner"></div><div class="rv2-corner"></div>';
+  roles.forEach(function(role){h+='<div class="rv2-colh"><span class="rv2-colname">'+role.name+'</span></div>';});
+  h+='<div class="rv2-corner"></div><div class="rv2-axis rv2-axis-v">Vulnerability</div>';
+  roles.forEach(function(role){h+='<div class="rv2-lvl '+lvlClass(role.respV)+'">'+rWord(role.respV)+'</div>';});
+  secNames.forEach(function(sn){
+    var rowsel=(state.rvRow===sn)?' sel':'';
+    h+='<div class="rv2-rowh'+rowsel+'" data-rvrow="'+sn+'"><span class="rv2-rowname">'+sn+'</span></div>';
+    h+='<div class="rv2-lvl '+lvlClass(vulnAt(sn,r))+'">'+vWord(vulnAt(sn,r))+'</div>';
+    roles.forEach(function(role){
+      var list=cellMap[sn+'|'+role.key]||[];
+      if(!list.length){h+='<div class="rv2-cell empty" title="No companies of this role in this sector — not reviewed"></div>';return;}
+      var k=list.filter(function(c){return c.ack.indexOf(r)!==-1;}).length;
+      var pct=Math.round(k/list.length*100);
+      var selc=(sel&&sel.sn===sn&&sel.a===role.key)?' sel':'';
+      h+='<div class="rv2-cell d-'+discLevel(pct)+selc+'" data-rvxcell="'+sn+'|'+role.key+'" title="'+sn+' · '+role.name+' — '+k+' of '+list.length+' disclose ('+pct+'%)">'+k+'/'+list.length+'</div>';
+    });
+  });
+  h+='</div>';
+  h+='<div class="rv2-legends">'+
+     '<div class="rv2-leg"><span class="rv2-leglab">Disclosure</span><span class="rv2-ends"><span>0</span><span class="rv2-ramp"><span class="rv2-sw" style="background:var(--d0)"></span><span class="rv2-sw" style="background:var(--d1)"></span><span class="rv2-sw" style="background:var(--d2)"></span><span class="rv2-sw" style="background:var(--d3)"></span><span class="rv2-sw" style="background:var(--d4)"></span><span class="rv2-sw" style="background:var(--d5)"></span></span><span>all</span></span></div>'+
+     '<div class="rv2-leg"><span class="rv2-leglab">Level</span><span><span class="rv2-band" style="background:var(--lvl-5)"></span>Extremely/Primarily</span><span><span class="rv2-band" style="background:var(--lvl-4)"></span>Highly</span><span><span class="rv2-band" style="background:var(--lvl-3)"></span>Moderately</span><span><span class="rv2-band" style="background:var(--lvl-2)"></span>Minimally</span><span><span class="rv2-band" style="background:var(--lvl-1)"></span>Not at all</span></div>'+
+     '<div class="rv2-leg"><span class="rv2-band rv2-band-empty"></span>Not reviewed (no companies of this role in this sector)</div>'+
+     '</div>';
+  if(sel&&cellMap[sel.sn+'|'+sel.a]){
+    var role=roles.filter(function(x){return x.key===sel.a;})[0];
+    var sl=cellMap[sel.sn+'|'+sel.a].slice().sort(coSort);
+    h+='<div class="rvx-detail">'+coTable(sl,false,sel.sn+' × '+(sel.a==='—'?'Role n/a':roleShort(sel.a))+' — '+tip('vulnerability','vuln')+' '+vWord(vulnAt(sel.sn,r))+', '+tip('responsibility','resp')+' '+(role?rWord(role.respV):''))+'</div>';
+  } else if(state.rvRow&&groups[state.rvRow]){
+    var sn=state.rvRow;
+    var rows=groups[sn].slice().sort(function(c1,c2){var rr=(respAt(c2.actor,r)||0)-(respAt(c1.actor,r)||0);if(Math.abs(rr)>0.001)return rr;return coSort(c1,c2);});
+    h+='<div class="rvx-detail">'+coTable(rows,true,sn+' — '+groups[sn].length+' companies · '+tip('vulnerability','vuln')+' '+vWord(vulnAt(sn,r)))+'</div>';
+  }
+  cbody.innerHTML=h;
+  var hiSec=secNames.filter(function(sn){var v=vulnAt(sn,r);return v!=null&&v>=3;}).length;
+  var hiRole=roles.filter(function(role){return role.respV!=null&&role.respV>=3;}).length;
+  if(hiSec>0&&hiRole>0){
+    requestAnimationFrame(function(){
+      var mm=document.getElementById('rv2-matrix');if(!mm)return;
+      var rowHs=mm.querySelectorAll('.rv2-rowh'),colHs=mm.querySelectorAll('.rv2-colh');
+      if(rowHs.length<hiSec||colHs.length<hiRole)return;
+      var mr=mm.getBoundingClientRect();
+      var top=rowHs[0].getBoundingClientRect().top-mr.top;
+      var lastRow=rowHs[hiSec-1].getBoundingClientRect();var bottom=(lastRow.top-mr.top)+lastRow.height;
+      var left=colHs[0].getBoundingClientRect().left-mr.left;
+      var lastCol=colHs[hiRole-1].getBoundingClientRect();var right=(lastCol.left-mr.left)+lastCol.width;
+      var z=document.createElement('div');z.className='rv2-hookzone';
+      z.style.top=(top-2)+'px';z.style.left=(left-2)+'px';z.style.width=(right-left+4)+'px';z.style.height=(bottom-top+4)+'px';
+      z.innerHTML='<span class="rv2-hooktag">Most expected to act</span>';
+      mm.appendChild(z);
+    });
+  }
+  document.getElementById('risk-back').addEventListener('click',function(){state.riskView=null;state.colsel=null;renderActive();});
+  cbody.querySelectorAll('[data-rvrow]').forEach(function(el){el.addEventListener('click',function(){var sx=el.getAttribute('data-rvrow');state.rvRow=(state.rvRow===sx)?null:sx;state.rvCell=null;renderRiskView(r);});});
+  cbody.querySelectorAll('[data-rvxcell]').forEach(function(el){el.addEventListener('click',function(){var pp=el.getAttribute('data-rvxcell').split('|');state.rvCell=(state.rvCell&&state.rvCell.sn===pp[0]&&state.rvCell.a===pp[1])?null:{sn:pp[0],a:pp[1]};state.rvRow=null;renderRiskView(r);});});
+  cbody.querySelectorAll('[data-rvco]').forEach(function(el){el.addEventListener('click',function(){selectCell(el.getAttribute('data-rvco'),r);});});
+}
+function exRow(label,v,def){
+  var b=band(v);var pct=v==null?0:Math.max(0,Math.min(100,v/4*100));
+  return '<div class="ex-row">'+
+    '<div class="ex-top"><span class="ex-label">'+label+'</span><span class="ex-band '+b[1]+'">'+(v==null?'No data':b[0])+'</span></div>'+
+    '<div class="ex-track"><div class="ex-fill '+b[1]+'-fill" style="width:'+pct+'%;"></div></div>'+
+    '<div class="ex-def">'+def+'</div>'+
+  '</div>';
+}
+function selectCell(name,r){
+  state.cellsel={co:name,r:r};state.rowsel=null;
+  if(state.tab==='matrix'&&state.riskView===null)renderMatrix();
+  var info=findCo(name),co=info.co;
+  var cell=co.cell[r]||{};
+  var ackd=!!cell.disclosed,lvl=sigLevel(co,r);
+  var s=sevAt(r),v=vulnAt(co.sector,r),a=respAt(co.actor,r);
+  var actorLabel=co.actor||'Role';
+  var h='';
+  h+='<div class="detail-eyebrow">Selected cell</div><div class="detail-title">'+name+' \u00d7 '+risks[r]+'</div>';
+  h+='<div class="detail-sub">'+info.sector+' \u00b7 '+(co.actor||'role n/a')+'</div>';
+  h+='<div class="plain">'+riskPlain[r]+'</div>';
+  h+='<div class="sig-block"><div class="sig-title">Expert ratings</div>';
+  h+='<div class="sig-intro">Three expert ratings, each an independent reason to expect '+name+' to engage with this risk. They carry the most weight where they converge.</div>';
+  h+=exRow('Severity',s,'How harmful experts rate this risk overall, regardless of company.')+exRow('Sector vulnerability',v,'How exposed the '+info.sector+' sector is to it.')+exRow(actorLabel+' responsibility',a,'How much '+name+', as '+(co.actor?('a '+co.actor.toLowerCase()):'its role')+', is expected to act on it.');
+  h+='<div class="ex-score"><span class="lbl">Combined</span><span class="val '+(lvl==='High'?'high':'mod')+'">'+lvl+'</span></div></div>';
+  h+='<div class="detail-eyebrow">Disclosure</div>';
+  if(ackd){
+    var meta=[];
+    if(cell.validation)meta.push(cell.validation);
+    if(cell.coverage!=null)meta.push('coverage '+cell.coverage);
+    if(cell.docsReviewed!=null)meta.push(cell.docsReviewed+' doc'+(cell.docsReviewed===1?'':'s')+' reviewed');
+    h+='<div class="evidence-quote">'+(cell.note?escapeHtml(cell.note):'Acknowledged in reviewed documents.')+(meta.length?'<div class="evidence-source">'+meta.join(' \u00b7 ')+'</div>':'')+'</div>';
+  }else{
+    h+='<div class="evidence-empty">No validated disclosure'+(lvl==='High'?', despite high significance.':'.')+'</div>';
+    if(cell.note)h+='<div class="evidence-note">Reviewer: '+escapeHtml(cell.note)+'</div>';
+  }
+  h+='<button class="detail-action" data-seecol="'+r+'">See all companies on this risk</button>';
+  detail.innerHTML=h;
+  detail.querySelector('[data-seecol]').addEventListener('click',function(){selectCol(r);});
+}
+function selectRow(name){
+  state.rowsel=name;state.colsel=null;state.cellsel=null;
+  if(state.tab==='matrix')renderMatrix();
+  var info=findCo(name),co=info.co;
+  var sigCount=0;for(var i=0;i<N;i++)if(significant(co,i))sigCount++;
+  var gap=gapScore(co);
+  var order=idxAll().sort(function(a,b){return combo(co,b)-combo(co,a);});
+  var h='<div class="detail-eyebrow">Company profile</div><div class="detail-title">'+name+'</div><div class="detail-sub">'+info.sector+' \u00b7 '+(co.actor||'role n/a')+'</div>';
+  h+='<div class="plain">Acknowledged '+co.ack.length+' of '+N+' risks. Significant on '+sigCount+', of which <b style="color:var(--amber-deep)">'+gap+' undisclosed</b>.</div><div class="rank-list">';
+  order.forEach(function(r){h+='<div class="rank-item" data-jump="'+r+'"><span class="rank-dot '+cellState(co,r)+'"></span><span class="rank-name">'+risks[r]+'</span></div>';});
+  h+='</div>';detail.innerHTML=h;
+  detail.querySelectorAll('[data-jump]').forEach(function(el){el.addEventListener('click',function(){selectCell(name,parseInt(el.getAttribute('data-jump')));});});
+}
+function selectCol(r){
+  state.colsel=r;state.rowsel=null;state.cellsel=null;state.riskView=r;
+  renderRiskView(r);
+  detail.innerHTML='<div class="detail-placeholder">Companies ranked by disclosure for '+risks[r]+'. Click any company to see its disclosure on this risk.</div>';
+}
+function openSectorHeatmap(sn){
+  state.tab='sectors';state.secView=sn;
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.toggle('active',c.getAttribute('data-tab')==='sectors');});
+  renderSectorHeatmap(sn);
+  detail.innerHTML='<div class="detail-placeholder">Green marks where a company discloses the risk. Click any cell for that company\u2019s disclosure on the risk.</div>';
+}
+document.getElementById('f-sector').addEventListener('change',function(e){state.sector=e.target.selectedIndex===0?'All':e.target.value;state.rowsel=state.colsel=state.cellsel=null;state.riskView=null;renderActive();detail.innerHTML='<div class="detail-placeholder">Click a cell for its disclosure and significance. Click a company or a risk name to drill in.</div>';});
+document.getElementById('f-actor').addEventListener('change',function(e){state.actor=e.target.selectedIndex===0?'All':e.target.value;renderActive();});
+document.getElementById('f-colmode').addEventListener('change',function(e){state.colmode=['domain','severity','vuln'][e.target.selectedIndex]||'domain';renderActive();});
+document.getElementById('f-sevscenario').addEventListener('change',function(e){state.sevScenario=e.target.selectedIndex===0?'businessAsUsual':'pragmaticMitigations';renderActive();if(state.cellsel)selectCell(state.cellsel.co,state.cellsel.r);});
+(function(){
+  var pcos=document.getElementById('p-sec-cosort');
+  if(pcos)pcos.addEventListener('change',function(e){state.secCoSort=e.target.value;if(state.tab==='sectors'&&state.secView)renderSectorHeatmap(state.secView);});
+  var prs=document.getElementById('p-sec-risksort');
+  if(prs)prs.addEventListener('change',function(e){var val=e.target.value;state.secSort=(val==='vuln')?{key:'vuln',dir:'desc'}:{key:'cov',dir:(val==='cov-asc'?'asc':'desc')};if(state.tab==='sectors'&&state.secView)renderSectorHeatmap(state.secView);});
+})();
+document.getElementById('f-sort').addEventListener('change',function(e){state.sort=['az','cov-desc','cov-asc'][e.target.selectedIndex];renderActive();});
+document.querySelectorAll('.chip').forEach(function(chip){chip.addEventListener('click',function(){document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});chip.classList.add('active');state.tab=chip.getAttribute('data-tab');if(state.tab==='sectors')state.secView=null;state.riskView=null;state.colsel=null;state.coView=null;renderActive();});});
+function renderGuide(){
+  ctitle.textContent='';
+  var h='<div class="guide-wrap">';
+  h+='<div class="page-hero">About</div>';
+  h+='<div class="guide-lead">The <b>AI Risk Disclosure Explorer</b> is part of the AI Risk Initiative at MIT FutureTech. It accompanies the <b>Organisational Review</b>, a systematic study of what the world’s largest companies say in public about the risks of artificial intelligence.</div>';
+  h+='<div class="guide-tour-row"><button class="guide-tour-btn" id="guide-tour-btn">Take a guided tour</button></div>';
+  h+='<div class="cp-block cp-shade">';h+='<div class="guide-sec-title">The project</div>';
+  h+='<div class="guide-body">We reviewed the public disclosures of roughly 200 of the world’s largest companies and coded every AI risk they acknowledge against the <b>AI Risk Repository</b>, a shared taxonomy of twenty-four risks across seven domains. We then set that record beside the priorities of experts, taken from the Repository’s Delphi survey of 272 specialists, who rated how severe each risk is, how vulnerable each sector is to it, and which roles are most responsible for addressing it.</div>';
+  h+='<div class="guide-body" style="margin-top:10px;">The result is a picture of where corporate attention lines up with expert concern, and where it does not. Just over half of the companies acknowledge no AI risk at all, and several of the risks experts rate most severe are largely absent from the public record.</div>';
+  h+='</div>';h+='<div class="cp-block">';h+='<div class="guide-sec-title">Research questions</div>';
+  h+='<ol class="about-rq"><li><b>RQ1.</b> Which AI risks do large global companies publicly acknowledge?</li><li><b>RQ2.</b> How does AI risk acknowledgement vary across sectors and AI actor roles?</li><li><b>RQ3.</b> How does corporate AI risk acknowledgement compare with expert priorities?</li></ol>';
+  h+='<div class="guide-body" style="margin-top:8px;"><b>Supplementary question.</b> Which AI risk mitigations do companies disclose?</div>';
+  h+='</div>';h+='<div class="cp-block cp-shade">';h+='<div class="guide-sec-title">Key concepts</div>';
+  h+='<div class="guide-body">Each company’s disclosure is read against three independent expert ratings. Each is informative on its own, and most informative where they converge on the same company.</div>';
+  h+='<div class="guide-concepts">';
+  h+='<div class="gc"><div class="gc-band vx-extreme">Risk severity</div><div class="gc-def">How harmful experts judge the risk overall. <b>Same for every company.</b></div></div>';
+  h+='<div class="gc-op">+</div>';
+  h+='<div class="gc"><div class="gc-band vx-high">Sector vulnerability</div><div class="gc-def">How exposed experts judge a sector to be. <b>Varies by sector.</b></div></div>';
+  h+='<div class="gc-op">+</div>';
+  h+='<div class="gc"><div class="gc-band vx-mod">Actor responsibility</div><div class="gc-def">How much a company’s role is expected to act. <b>Varies by role.</b></div></div>';
+  h+='</div>';
+  h+='<div class="about-callout"><div class="guide-body" style="margin-bottom:6px;"><b>Non-disclosure is especially important when a risk is:</b></div>';
+  h+='<ul class="about-bullets" style="margin:0;"><li>expert-rated as severe;</li><li>relevant to the company’s sector;</li><li>linked to the company’s AI actor role.</li></ul></div>';
+  h+='<div class="guide-body" style="margin-top:8px;">When all three coincide on a company that stays silent, that silence is the hardest to read as the risk simply not applying to it.</div>';
+  h+='<table class="about-tbl"><tbody>';
+  h+='<tr><th>AI actors and roles</th><td>The position a company occupies in the AI value chain, for example developer, deployer, infrastructure provider, or user. How responsible a company is for a given risk depends on its role.</td></tr>';
+  h+='<tr><th>Disclosure</th><td>Whether a company acknowledges a risk in its public documents. It is the visible and comparable record of corporate attention, recorded here from named sources.</td></tr>';
+  h+='<tr><th>The 24 risks and 7 domains</th><td>The AI Risk Repository organises twenty-four risks into seven domains, from discrimination and privacy through to misuse and system safety. The full taxonomy is on the Risks tab.</td></tr>';
+  h+='<tr><th>Coverage</th><td>The share of a group that discloses a risk. Sector coverage is measured per risk, and company coverage is measured across all twenty-four risks.</td></tr>';
+  h+='</tbody></table>';
+  h+='</div>';h+='<div class="cp-block">';h+='<div class="guide-sec-title">How the views connect</div>';
+  h+='<div class="guide-body">Two tabs stand on their own: <b>Risks</b> holds the full taxonomy, and <b>Documents</b> collects every reviewed source document grouped by type. The rest of the views branch out from Home.</div>';h+='<div class="guide-diagram" id="guide-diagram">';
+  h+='<div class="gd-node gd-home" data-go="matrix"><div class="gd-name">Home</div><div class="gd-sub">every company × every risk</div></div>';
+  h+='<div class="gd-fan">';
+  h+='<div class="gd-arm"><div class="gd-arrow">click a <b>risk</b> column →</div><div class="gd-node" data-go="riskdemo"><div class="gd-name">Per-risk view</div><div class="gd-sub">one risk as sectors × responsible roles, with the corner most expected to act flagged</div></div></div>';
+  h+='<div class="gd-arm"><div class="gd-arrow">click a <b>sector</b> →</div><div class="gd-node" data-go="sectors"><div class="gd-name">Sector heatmap</div><div class="gd-sub">a sector’s risks, and which companies disclose each</div></div></div>';
+  h+='<div class="gd-arm"><div class="gd-arrow">click a <b>company</b> →</div><div class="gd-node" data-go="codemo"><div class="gd-name">Company profile</div><div class="gd-sub">one company across all 24 risks</div></div></div>';
+  h+='<div class="gd-arm"><div class="gd-arrow">click a <b>cell</b> →</div><div class="gd-node" data-go="celldemo"><div class="gd-name">Evidence panel</div><div class="gd-sub">the validated quote, source, and reviewer note</div></div></div>';
+  h+='</div></div>';
+  h+='</div>';h+='<div class="cp-block cp-shade">';h+='<div class="guide-sec-title">How it was built</div>';
+  h+='<div class="guide-body">Disclosures were located and coded by hand from public company documents, and each is shown with its source and a reviewer’s note. Expert ratings are the median response from the final round of the Delphi survey, placed on a five-level scale. The data is refreshed from the source when the site is built.</div>';
+  h+='</div>';
+  h+='</div>';
+  cbody.innerHTML=h;
+  var gtb=document.getElementById('guide-tour-btn');if(gtb)gtb.addEventListener('click',showTourChooser);
+  cbody.querySelectorAll('[data-go]').forEach(function(el){el.addEventListener('click',function(){
+    var g=el.getAttribute('data-go');
+    if(g==='matrix'){switchTab('matrix');}
+    else if(g==='sectors'){switchTab('sectors');}
+    else if(g==='riskdemo'){switchTab('matrix');selectCol(A.risk);}
+    else if(g==='codemo'){switchTab('matrix');selectRow(A.company);}
+    else if(g==='celldemo'){switchTab('matrix');selectCell(A.company,A.risk);}
+  });});
+}
+function switchTab(t){
+  state.tab=t;state.riskView=null;state.secView=null;state.colsel=null;state.coView=null;
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.toggle('active',c.getAttribute('data-tab')===t);});
+  renderActive();
+}
+function updatePanel(){
+  var t=state.tab;
+  var pm=document.getElementById('panel-matrix'),ps=document.getElementById('panel-sectors'),pn=document.getElementById('panel-none');
+  if(pm)pm.style.display=(t==='matrix')?'':'none';
+  if(ps)ps.style.display=(t==='sectors')?'':'none';
+  if(pn)pn.style.display=(t==='compare'||t==='guide'||t==='companies'||t==='risks'||t==='documents')?'':'none';
+  var cs=document.getElementById('p-sec-cosort');if(cs)cs.value=state.secCoSort;
+  var rs=document.getElementById('p-sec-risksort');if(rs)rs.value=(state.secSort.key==='cov')?('cov-'+state.secSort.dir):'vuln';
+}
+function renderActive(){updatePanel();if(state.tab==='matrix'){if(state.riskView!==null)renderRiskView(state.riskView);else renderMatrix();}else if(state.tab==='sectors')renderSectors();else if(state.tab==='companies')renderCompanies();else if(state.tab==='documents')renderDocuments();else if(state.tab==='risks'){if(state.riskView!==null)renderRiskView(state.riskView);else renderRisks();}else if(state.tab==='guide')renderGuide();else renderCompare();}
+/* ---------- TOUR ---------- */
+/* ---------- TOURS ---------- */
+// find a deep-red, zero-disclosure cell (high vulnerability, nobody discloses) to zoom into
+function findGapCell(){var best=null;Object.keys(sectorVuln).forEach(function(sn){idxAll().forEach(function(r){var v=sectorVuln[sn][r];var c=sectorCoverage(sn,r);if(v!=null&&v>=3&&(c===null||c===0)){if(!best||v>best.v)best={sn:sn,r:r,v:v};}});});return best;}
+function gapCellSel(){var g=findGapCell();return g?('[data-seccell="'+g.sn+'|'+g.r+'"]'):'#center-main';}
+function financeCellSel(){var sn='Finance';var v=sectorVuln[sn];if(!v)return gapCellSel();var best=null;idxAll().forEach(function(r){var vv=v[r],c=sectorCoverage(sn,r);if(vv!=null&&vv>=3&&(c===null||c===0)){if(!best||vv>best.v)best={r:r,v:vv};}});if(!best)idxAll().forEach(function(r){var vv=v[r];if(vv!=null&&(!best||vv>best.v))best={r:r,v:vv};});return best?('[data-seccell="Finance|'+best.r+'"]'):'#center-main';}
+var tours={
+ general:[
+  {sel:'#tabs-bar',setup:function(){switchTab('matrix');},title:'Five views, one dataset',body:'The pills along the top switch between the views. <b>Home</b> is the master matrix of every company against every risk. <b>Sectors</b> profiles each industry. <b>Risks</b> is the full taxonomy of the twenty-four risks. <b>Companies</b> lists every organisation we reviewed. <b>Documents</b> gathers all the source material by type. <b>Compare</b> sets a few of them side by side. We will walk through each of them in turn.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');},title:'Home: companies against risks',body:'Every row is a sector and every column is one of the twenty-four AI risks. Reading down a column tells you how widely a risk is disclosed across the whole economy. Reading across a row tells you how a single sector is responding to all of the risks at once.'},
+  {sel:'.mx-legend',setup:function(){switchTab('matrix');},title:'How to read a cell',body:'The colour of each cell is how vulnerable experts judge that sector to that risk, running from deep red for extremely vulnerable through to blue for not at all. The number inside is the share of companies in that sector that actually disclose the risk. When no company discloses it, the cell shows a dash in place of a number.'},
+  {sel:gapCellSel,setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Zoom in on a gap',body:'This is the kind of cell that is worth stopping on. It is deep red, so experts consider the sector highly vulnerable to this risk. Yet it shows only a dash, which means not a single company in the sector says anything about it. High stakes paired with complete silence is the clearest sign of a blind spot, and it is precisely the pattern this tool is built to surface.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');state.expanded={};state.expanded[A.sector]=true;renderMatrix();},title:'Open a sector',body:'Clicking a sector row opens the individual companies underneath it. The cell colour still shows the sector’s vulnerability, and a tick now marks each company that discloses the risk. This is where a sector-wide gap resolves into the particular firms that are silent and the ones that are not.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');selectCol(A.risk);},title:'Look at a single risk',body:'Clicking a risk column header opens that risk on its own. Sectors run down the side in order of vulnerability, and the roles most responsible for acting run across the top. The red bracket in the corner marks where the most vulnerable sectors meet the most responsible roles. A silence that falls inside that bracket is the hardest one to explain away.'},
+  {sel:'#detail',setup:function(){switchTab('matrix');selectCell(A.company,A.risk);},title:'Read the evidence',body:'Clicking any cell opens the evidence behind it. You see the three expert ratings that make the cell matter, which are severity, sector vulnerability and role responsibility, and then the exact wording the company used, taken from a named public document and checked by a reviewer.'},
+  {sel:'#center-main',setup:function(){openSectorHeatmap(A.sector);},title:'Sectors: one industry in depth',body:'The <b>Sectors</b> tab profiles each industry. We have opened one here: a heatmap of every risk against the companies in that sector, with expert vulnerability down the side and a tick wherever a company discloses, followed by a short summary of the sector\u2019s gaps and its most-disclosing firms.'},
+  {sel:'#center-main',setup:function(){switchTab('risks');},title:'Risks: the full taxonomy',body:'The <b>Risks</b> tab lays out all twenty-four risks in their seven domains, the AI Risk Repository taxonomy, alongside the share of companies that disclose each one. Clicking any risk opens the same detailed sector-by-role view you reached from Home.'},
+  {sel:'#center-main',setup:function(){switchTab('companies');},title:'Companies: search and sort',body:'The <b>Companies</b> tab lists every organisation we reviewed, grouped by sector and sortable by how much each discloses. You can search for one by name, sector, or role.'},
+  {sel:'#center-main',setup:function(){switchTab('companies');state.coView=A.company;renderCompanyProfile(A.company);},title:'A company in full',body:'Opening a company gives its full profile: its role in the AI ecosystem, a matrix of where its sector is most vulnerable and its role most responsible, the risks it acknowledges, and the source documents reviewed for it.'},
+  {sel:'#center-main',setup:function(){switchTab('documents');},title:'Documents: the source material',body:'Every document we read sits in the <b>Documents</b> tab, grouped into ethics principles, governance principles, ESG reports and annual reports. This is where the disclosures come from, so you can go straight to the original.'},
+  {sel:'#center-main',setup:function(){switchTab('compare');},title:'Compare: firms side by side',body:'The <b>Compare</b> tab puts a handful of companies in columns next to each other, risk by risk, so you can see at a glance where one discloses and another stays silent. Narrow the pool by sector or role, then pick who to line up.'},
+  {sel:'#tabs-bar',setup:function(){switchTab('guide');},title:'That is the tour',body:'That is every view. The <b>About</b> tab explains the project and its method in full, and every underlined term has a definition on hover. From here, pick whichever view fits the question you came with.'}
+ ],
+ regulator:[
+  {sel:'#tabs-bar',setup:function(){switchTab('matrix');},title:'The views you will use',body:'As a regulator of a sector or activity you want to target your effort where it counts. We will start on <b>Home</b> to get the lie of the land, open the specific <b>risk</b> you oversee, read who is doing the most and the least, and finish in the <b>Documents</b>. An online-safety commissioner, worried about toxic content and discrimination, is our running example.'},
+  {sel:'.header',setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Your goal',body:'Say you are an online-safety commissioner. You want to see which companies are doing the most, and the least, on the risks you oversee, so you can decide who to talk to and what to hold up as good practice.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Start on Home',body:'Home is the whole field at once: every sector down the side, all twenty-four risks across the top. Before narrowing to your own risks it is worth reading the shape of it. The colour of a cell is how vulnerable experts judge that sector to that risk, and the number is the share of that sector that discloses it.'},
+  {sel:'.mx-legend',setup:function(){switchTab('matrix');},title:'Find your risks in the columns',body:'Run along the top row of risk numbers to the ones you oversee. For a commissioner that is exposure to toxic content and unfair discrimination. Reading straight down those columns shows, sector by sector, how exposed each one is and how much it actually says.'},
+  {sel:gapCellSel,setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Zoom in on a silent cell',body:'This is the kind of cell to stop on. It is deep red, so the sector is judged highly vulnerable, yet it shows only a dash: not one company there discloses the risk. High exposure paired with total silence is the clearest blind spot, and exactly what a regulator wants to find.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';selectCol(A.risk);},title:'Open the risk itself',body:'Clicking a risk column header opens that one risk on its own. Sectors run down the side by how vulnerable they are, the roles most responsible for acting run across the top, and each cell is shaded by how many companies disclose. This is where the apparent state of the art shows itself.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';selectCol(A.risk);},title:'The corner most expected to act',body:'The red bracket marks where the most vulnerable sectors meet the most responsible roles. Click any cell inside it to see the individual companies behind it and whether each one discloses. Those firms are the ones setting the standard, or conspicuously not.'},
+  {sel:'#center-main',setup:function(){switchTab('documents');},title:'Go and read what they say',body:'Once you know which companies set the standard, the <b>Documents</b> tab gathers their actual source material, grouped by type. This is where a commissioner stops taking claims on trust and reads the AI governance and ESG documents first-hand.'}
+ ],
+ corporate:[
+  {sel:'#tabs-bar',setup:function(){switchTab('matrix');},title:'The views you will use',body:'As an AI risk staffer you are benchmarking your own organisation against its peers. We will start on <b>Home</b>, filter to your <b>sector</b>, expand it to see the individual firms, line the relevant ones up in <b>Compare</b>, then read what competitors say in the <b>Documents</b>. A bank in the Finance sector is our running example.'},
+  {sel:'.header',setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Your goal',body:'You want to see where your company ranks against competitors, particularly inside your own sector, so you can argue internally for doing more, or show that you are already doing well. You also want to see which mitigations others describe, so you can raise them when the team plans.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Start on Home',body:'Home puts every company against every risk, grouped by sector. Before zeroing in, read the Finance row: the colours show how vulnerable experts judge the sector to each risk, and the numbers show how much of the sector actually discloses.'},
+  {sel:'#left-panel',setup:function(){switchTab('matrix');state.sector='Finance';var _fs=document.getElementById('f-sector');if(_fs)_fs.value='Finance';renderMatrix();},title:'Filter to your sector',body:'Narrowing to Finance in the filters fixes the peer group and re-sorts the risks to the ones experts consider most pressing for banks. Every comparison from here is against the firms you are actually measured against.'},
+  {sel:financeCellSel,setup:function(){switchTab('matrix');state.sector='Finance';renderMatrix();},title:'Zoom in on a cell',body:'Zoom into a risk where Finance is highly exposed. The cell colour is the sector’s vulnerability and the number is how much of the sector discloses. A red cell with a low number is a risk your industry takes seriously in principle but says little about in public.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='Finance';state.expanded={};state.expanded['Finance']=true;renderMatrix();},title:'Expand to the individual firms',body:'Clicking the sector row opens the companies underneath it. Now each cell carries a tick where that firm discloses the risk and stays blank where it does not, so you can see at once which banks are ahead of you and which are behind.'},
+  {sel:'#center-main',setup:function(){openSectorHeatmap('Finance');},title:'The Finance sector in full',body:'The <b>Sectors</b> tab gives the whole industry as one view: every risk down the side by expert vulnerability, each Finance company across the top with a tick where it discloses, and a summary of where the sector has gaps and which firms disclose the most. This is your peer group at a glance.'},
+  {sel:'.cmp-pool',setup:function(){var b=[];sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1&&/bank/i.test(c.n);}).map(function(c){return c.n;});});if(b.length<3)sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1;}).map(function(c){return c.n;});});switchTab('compare');state.cmpSec=['Finance'];state.cmpActor=['AI Deployer'];state.cmp=b.slice(0,3);renderCompare();},title:'Pick your rivals to compare',body:'In <b>Compare</b> you first narrow the pool, here to the <b>Finance</b> sector and the <b>AI deployer</b> role, then pick the firms to line up. We have selected three banks; click any company to add or remove it, up to six at a time.'},
+  {sel:'.cmp-grid',setup:function(){var b=[];sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1&&/bank/i.test(c.n);}).map(function(c){return c.n;});});if(b.length<3)sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1;}).map(function(c){return c.n;});});switchTab('compare');state.cmpSec=['Finance'];state.cmpActor=['AI Deployer'];state.cmp=b.slice(0,3);renderCompare();},title:'Read the comparison across the risks',body:'Now the three banks sit side by side, one row per risk. Reading across a row, a green tick where a rival discloses and a blank where you stay silent is a gap to close, and the reverse is a strength to point to. Click any company header to open its full profile.'},
+  {sel:'#center-main',setup:function(){var nm=null;sectors.forEach(function(s){if(s.name==='Finance'){var bk=s.cos.filter(function(c){return /bank/i.test(c.n);});nm=(bk[0]||s.cos[0]).n;}});switchTab('companies');state.coView=nm;renderCompanyProfile(nm);},title:'One rival in depth',body:'Opening any company gives its full profile: its role in the AI ecosystem, a matrix of where its sector is most vulnerable and its role most responsible, every risk it acknowledges, and the source documents reviewed for it. This is how you read a single competitor closely.'},
+  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';selectCol(A.risk);},title:'What mitigations others describe',body:'Open a single risk to see every firm that discloses it, and the sourced quote behind each cell. This is where you find the specific mitigations competitors talk about, the concrete examples worth bringing to a planning session.'},
+  {sel:'#center-main',setup:function(){switchTab('documents');},title:'Read the source material',body:'Finally, the <b>Documents</b> tab collects competitors’ AI governance, ESG and annual reports in one place. When you need chapter and verse for an internal case, this is where you find what a rival actually committed to, in their own words.'}
+ ],
+};
+var tourMeta={
+ general:{name:'General tour',desc:'How the whole tool fits together'},
+ regulator:{name:'Sector-based regulator',desc:'See who is doing the most and least on a risk you oversee'},
+ corporate:{name:'Corporate AI risk staffer',desc:'Benchmark your company against sector peers'},
+};
+var tourSteps=tours.general;
+var tourI=0;
+var tourEl={root:document.getElementById('tour'),spot:document.getElementById('tour-spot'),card:document.getElementById('tour-card'),n:document.getElementById('tour-stepn'),t:document.getElementById('tour-title'),b:document.getElementById('tour-body'),back:document.getElementById('tour-back'),next:document.getElementById('tour-next'),skip:document.getElementById('tour-skip')};
+function startTour(track){tourSteps=tours[track]||tours.general;tourI=0;tourEl.root.style.display='block';showTourStep();}
+function showTourChooser(){
+  var ov=document.getElementById('tour-chooser');
+  ov.style.display='flex';
+}
+function hideTourChooser(){document.getElementById('tour-chooser').style.display='none';}
+function endTour(){tourEl.root.style.display='none';}
+function showTourStep(){
+  var step=tourSteps[tourI];
+  if(step.setup)step.setup();
+  setTimeout(function(){
+    var _sel=(typeof step.sel==='function')?step.sel():step.sel;
+    var target=(_sel&&_sel.nodeType===1)?_sel:document.querySelector(_sel);
+    if(!target){endTour();return;}
+    var rect=target.getBoundingClientRect();
+    var pad=6;
+    var top=Math.max(8,rect.top-pad), left=Math.max(8,rect.left-pad);
+    var w=rect.width+pad*2, h=rect.height+pad*2;
+    // clamp spotlight height so giant targets don't fill screen
+    if(h>window.innerHeight-120){h=window.innerHeight-120;}
+    tourEl.spot.style.top=top+'px';tourEl.spot.style.left=left+'px';
+    tourEl.spot.style.width=w+'px';tourEl.spot.style.height=h+'px';
+    // set content first so height is correct before positioning
+    tourEl.n.textContent='Step '+(tourI+1)+' of '+tourSteps.length;
+    tourEl.t.textContent=step.title;
+    tourEl.b.innerHTML=step.body;
+    tourEl.back.disabled=tourI===0;
+    tourEl.next.textContent=tourI===tourSteps.length-1?'Done':'Next';
+    // position card: prefer right of target, else below, else left
+    var cardW=300,cardH=tourEl.card.offsetHeight||220,gap=16;
+    var cl,ct;
+    if(rect.right+gap+cardW<window.innerWidth){cl=rect.right+gap;ct=Math.max(8,Math.min(rect.top,window.innerHeight-cardH-8));}
+    else if(rect.left-gap-cardW>0){cl=rect.left-gap-cardW;ct=Math.max(8,Math.min(rect.top,window.innerHeight-cardH-8));}
+    else{cl=Math.max(8,Math.min(rect.left,window.innerWidth-cardW-8));ct=Math.min(rect.bottom+gap,window.innerHeight-cardH-8);}
+    tourEl.card.style.left=cl+'px';tourEl.card.style.top=ct+'px';
+  },step.setup?120:0);
+}
+tourEl.next.addEventListener('click',function(){if(tourI===tourSteps.length-1){endTour();switchTab('matrix');}else{tourI++;showTourStep();}});
+tourEl.back.addEventListener('click',function(){if(tourI>0){tourI--;showTourStep();}});
+tourEl.skip.addEventListener('click',function(){endTour();switchTab('matrix');});
+window.addEventListener('resize',function(){if(tourEl.root.style.display==='block')showTourStep();});
+
+// populate tour chooser
+(function(){
+  var list=document.getElementById('chooser-list');
+  var html='';
+  Object.keys(tourMeta).forEach(function(k){
+    html+='<div class="chooser-opt" data-track="'+k+'"><div class="chooser-opt-name">'+tourMeta[k].name+'</div><div class="chooser-opt-desc">'+tourMeta[k].desc+'</div></div>';
+  });
+  list.innerHTML=html;
+  list.querySelectorAll('[data-track]').forEach(function(el){el.addEventListener('click',function(){hideTourChooser();startTour(el.getAttribute('data-track'));});});
+})();
+document.getElementById('chooser-close').addEventListener('click',hideTourChooser);
+document.getElementById('intro-tour').addEventListener('click',function(){document.getElementById('intro-overlay').style.display='none';showTourChooser();});
+document.getElementById('intro-start').addEventListener('click',function(){document.getElementById('intro-overlay').style.display='none';});
+document.getElementById('intro-guide').addEventListener('click',function(){document.getElementById('intro-overlay').style.display='none';switchTab('guide');});
+// ---------- Data load (./data.json, generated at build time) ----------
+function populateFilters(D){
+  var fs=document.getElementById('f-sector');
+  fs.innerHTML='<option>All sectors ('+D.sectors.length+')</option>'+D.sectors.map(function(s){return '<option>'+s+'</option>';}).join('');
+  var fa=document.getElementById('f-actor');
+  fa.innerHTML='<option>All roles</option>'+D.actors.map(function(a){return '<option>'+a+'</option>';}).join('');
+  var fc=document.getElementById('f-colmode');
+  fc.innerHTML='<option>Grouped by domain</option><option>Ordered by severity</option><option>By sector vulnerability</option>';
+}
+function setCounts(nco){
+  var rm=document.querySelector('.right-meta');
+  if(rm)rm.innerHTML='<strong>'+nco+' companies</strong> · '+N+' risks · validated';
+}
+function computeAnchors(){
+  var risk=numToIndex['1.1']!=null?numToIndex['1.1']:0;
+  var sector=null,i;
+  for(i=0;i<sectors.length;i++){if(sectors[i].name==='Finance'){sector=sectors[i].name;break;}}
+  if(!sector&&sectors.length)sector=sectors[0].name;
+  var ranked=(secCos(sector)||[]).slice().sort(function(a,b){return b.ack.length-a.ack.length;});
+  var company=null;
+  for(i=0;i<ranked.length;i++){if(ranked[i].ack.indexOf(risk)!==-1){company=ranked[i].n;break;}}
+  if(!company&&ranked.length)company=ranked[0].n;
+  if(!company&&sectors[0]&&sectors[0].cos[0])company=sectors[0].cos[0].n;
+  A={risk:risk,sector:sector,company:company,compare:ranked.slice(0,3).map(function(c){return c.n;})};
+}
+function applyData(D){
+  // risks (index-based) + number lookup
+  risks=[];riskNums=[];riskPlain=[];riskDomain=[];numToIndex={};
+  D.risks.forEach(function(rk,i){risks.push(rk.name);riskNums.push(rk.num);riskPlain.push(rk.desc||'');riskDomain.push(rk.domain);numToIndex[rk.num]=i;});
+  N=risks.length;
+  // 7 domains as ordered groups of risk indices
+  domains=D.domains.map(function(dn){return {name:dn,risks:[]};});
+  var di={};domains.forEach(function(g,i){di[g.name]=i;});
+  D.risks.forEach(function(rk,i){var k=di[rk.domain];if(k!=null)domains[k].risks.push(i);});
+  // two lenses, 0-4, stored as per-index arrays
+  sectorVuln={};
+  D.sectors.forEach(function(sn){var m=D.sectorVulnerability[sn]||{},a=[];for(var i=0;i<N;i++)a[i]=m[riskNums[i]];sectorVuln[sn]=a;});
+  actorResp={};ACTORS=D.actors.slice();sectorDef=D.sectorDefinitions||{};
+  D.actors.forEach(function(an){var m=D.actorResponsibility[an]||{},a=[];for(var i=0;i<N;i++)a[i]=m[riskNums[i]];actorResp[an]=a;});
+  severityByScenario={businessAsUsual:[],pragmaticMitigations:[]};
+  ['businessAsUsual','pragmaticMitigations'].forEach(function(sc){var m=(D.severity&&D.severity[sc])||{},a=[];for(var i=0;i<N;i++)a[i]=m[riskNums[i]];severityByScenario[sc]=a;});
+  // companies grouped into sectors[], with index-keyed disclosure cells
+  var bySec={};
+  D.companies.forEach(function(co){
+    var ack=[],cell={};
+    for(var i=0;i<N;i++){var c=co.cells[riskNums[i]];if(c){cell[i]=c;if(c.disclosed)ack.push(i);}}
+    (bySec[co.sector]=bySec[co.sector]||[]).push({n:co.name,actor:co.actor,sector:co.sector,docs:co.docs||0,ack:ack,cell:cell,logo:co.logo||null,description:co.description||'',industry:co.industry||'',country:co.country||'',marketCap:co.marketCap||'',ticker:co.ticker||'',website:co.website||'',docs2:co.docs2||[],roleSummary:co.roleSummary||''});
+  });
+  sectors=D.sectors.map(function(sn){return {name:sn,cos:(bySec[sn]||[])};});
+  populateFilters(D);setCounts(D.companies.length);computeAnchors();
+  renderActive();
+}
+// ---- password gate: decrypt data.enc in the browser ----
+(function(){
+  var ITER=250000;
+  async function unlock(password){
+    var resp=await fetch('./data.enc?t='+Date.now());
+    if(!resp.ok)throw new Error('data.enc missing (HTTP '+resp.status+')');
+    var raw=new Uint8Array(await resp.arrayBuffer());
+    var salt=raw.slice(0,16),iv=raw.slice(16,28),ct=raw.slice(28);
+    var km=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
+    var key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:ITER,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+    var buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:iv},key,ct);
+    return JSON.parse(new TextDecoder().decode(buf));
+  }
+  var form=document.getElementById('lock-form'),input=document.getElementById('lock-input'),errEl=document.getElementById('lock-err'),btn=document.getElementById('lock-btn');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var pw=input.value;if(!pw)return;
+    btn.disabled=true;errEl.textContent='';btn.textContent='Unlocking\u2026';
+    unlock(pw).then(function(D){
+      applyData(D);
+      var ls=document.getElementById('lock-screen');if(ls&&ls.parentNode)ls.parentNode.removeChild(ls);
+    }).catch(function(err){
+      btn.disabled=false;btn.textContent='Unlock';
+      errEl.textContent=(err&&err.name==='OperationError')?'Incorrect password.':'Could not unlock: '+((err&&err.message)||err);
+      input.select();
+    });
+  });
+  if(input)input.focus();
+})();
+})();
+</script>
+</body>
+</html>

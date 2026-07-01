@@ -1,0 +1,10 @@
+# Public repo: ignore EVERYTHING by default, then allow only what the static
+# site needs to run. Build tooling, secrets, internal docs and source data all
+# stay local and out of the published repo.
+/*
+
+# --- the only files the deployed site needs ---
+!/.gitignore
+!/index.html
+!/data.enc
+!/thumbs/

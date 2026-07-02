@@ -33,6 +33,9 @@ body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--ink);font
 .brand-text span{color:var(--muted);font-weight:400;}
 .title-block{flex:1;text-align:left;}
 .sitebar{display:flex;align-items:center;justify-content:space-between;gap:14px 24px;flex-wrap:wrap;width:100vw;margin-left:calc(50% - 50vw);padding:14px calc(50vw - 50%) 13px;margin-bottom:0;border-bottom:3px solid var(--red);}
+.proto-banner{position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:center;gap:10px;width:100vw;margin-left:calc(50% - 50vw);padding:9px 16px;background:var(--red);color:#fff;font-size:13px;font-weight:600;line-height:1.4;text-align:center;letter-spacing:0.01em;box-shadow:0 1px 6px rgba(0,0,0,0.15);}
+.proto-banner-icon{flex:none;font-size:16px;line-height:1;}
+@media(max-width:560px){.proto-banner{font-size:12px;padding:8px 12px;gap:7px;}}
 .sitebar-logo{display:inline-flex;align-items:center;}
 .sitebar-logo img{height:30px;display:block;}
 .sitenav{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;}
@@ -450,6 +453,13 @@ body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--ink);font
 .cpm-key.yes{background:var(--d5);}
 .cpm-key.no{background:#E6E6E4;}
 .cpm-key-num{color:var(--muted);}
+.cmp-cpm-intro{font-size:13px;color:var(--muted);line-height:1.5;max-width:820px;margin:22px 0 14px;}
+.cmp-cpm-row{display:flex;flex-wrap:wrap;gap:26px;}
+.cmp-cpm-card{flex:1 1 440px;min-width:360px;max-width:680px;}
+.cmp-cpm-head{font-weight:700;font-size:16px;line-height:1.2;margin-bottom:8px;}
+.cmp-cpm-sub{display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:3px;}
+.cmp-cpm-axis{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);margin-bottom:4px;padding-left:110px;}
+.cmp-cpm-card .cpm{max-width:none;width:100%;}
 .cmp-filters{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;padding:14px 16px;background:var(--bg);border-radius:6px;margin-bottom:14px;}
 .cmp-fgroup{display:flex;flex-direction:column;gap:7px;}
 .cmp-flabel{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);}
@@ -667,6 +677,7 @@ body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--ink);font
       </div>
     </div>
   </div>
+  <div class="proto-banner" role="alert"><span class="proto-banner-icon" aria-hidden="true">⚠</span><span>This is a research prototype. The data and analyses are preliminary and not yet validated.</span></div>
   <div class="sitebar">
     <a class="sitebar-logo" href="https://airisk.mit.edu/" target="_blank" rel="noopener"><img src="https://cdn.prod.website-files.com/669550d38372f33552d2516e/69e6bfd322a7b39895d54390_horizontal-on-light.svg" alt="AI Risk Repository — MIT FutureTech"></a>
     <nav class="sitenav">
@@ -1095,28 +1106,13 @@ function renderCompanyProfile(name){
   h+='</div>';
   if(co.roleSummary)h+='<div class="cp-rolesum"><div class="cp-rolesum-h">Role in the AI ecosystem</div>'+escapeHtml(co.roleSummary).replace(/\n\n+/g,'<br><br>').replace(/\n/g,' ')+'</div>';
   h+='</div>';
-  var vLev=[4,3,2,1,0], rLev=[4,3,2,1,0];
-  function vWord(v){return ['Not at all','Minimally','Moderately','Highly','Extremely'][v];}
-  function rWord(v){return ['Not at all','Minimally','Moderately','Highly','Primarily'][v];}
   h+='<div class="cp-block">';
   h+='<div class="cp-sec-title">'+name+'’s risk exposure and responsibility</div>';
   if(co.actor){
-    var bkt={};
-    idxAll().forEach(function(rr){var vv=vulnAt(sector,rr),aa=respAt(co.actor,rr);if(vv==null||aa==null)return;(bkt[vv+'|'+aa]=bkt[vv+'|'+aa]||[]).push(rr);});
     h+='<div class="cp-mx-intro">Each of the 24 risks placed by how vulnerable '+name+'’s sector is to it (rows) and how responsible its role is for it (columns). A green chip means the company discloses that risk; grey means it stays silent. The red corner marks where both run highest, the risks it is most expected to act on.</div>';
-    h+='<div class="cpm" id="cpm" style="grid-template-columns:106px repeat(5,minmax(0,1fr));">';
-    h+='<div class="cpm-corner"></div>';
-    rLev.forEach(function(a){h+='<div class="cpm-colh cpm-l'+(a+1)+'">'+rWord(a)+'</div>';});
-    vLev.forEach(function(v){
-      h+='<div class="cpm-rowh cpm-l'+(v+1)+'">'+vWord(v)+'</div>';
-      rLev.forEach(function(a){
-        var rs=bkt[v+'|'+a]||[];
-        h+='<div class="cpm-cell'+((v>=3&&a>=3)?' cpm-hot':'')+'">'+rs.map(function(rr){var d=co.ack.indexOf(rr)!==-1;return '<span class="cpm-chip '+(d?'yes':'no')+'" data-cojump="'+rr+'" title="'+escapeHtml(riskNums[rr]+' '+risks[rr])+(d?' — discloses':' — silent')+'">'+riskNums[rr]+'</span>';}).join('')+'</div>';
-      });
-    });
-    h+='</div>';
+    h+=cpmMatrix(co,sector,'cpm');
     h+='<div class="cpm-legend"><span><span class="cpm-key yes"></span>Discloses</span><span><span class="cpm-key no"></span>Silent</span><span class="cpm-key-num">Chips show the risk number; hover for its name.</span></div>';
-  } else { h+='<div class="cp-ph-box">This company has no AI actor role assigned, so the responsibility lens is unavailable.</div>'; }
+  } else { h+=cpmMatrix(co,sector,'cpm'); }
   h+='</div>';
   h+='<div class="cp-block cp-shade">';
   h+='<div class="cp-sec-title">Acknowledged risks ('+disclosed+')</div>';
@@ -1134,9 +1130,9 @@ function renderCompanyProfile(name){
   else { h+='<div class="cp-ph-box">'+(co.docs||0)+' documents reviewed.</div>'; }
   h+='</div>';
   cbody.innerHTML=h;
-  (function(){var mm=document.getElementById('cpm');if(!mm)return;requestAnimationFrame(function(){var hot=mm.querySelectorAll('.cpm-hot');if(!hot.length)return;var mr=mm.getBoundingClientRect(),minL=1e9,minT=1e9,maxR=-1e9,maxB=-1e9;hot.forEach(function(c){var r=c.getBoundingClientRect();minL=Math.min(minL,r.left-mr.left);minT=Math.min(minT,r.top-mr.top);maxR=Math.max(maxR,r.left-mr.left+r.width);maxB=Math.max(maxB,r.top-mr.top+r.height);});var z=document.createElement('div');z.className='cpm-bracket';z.style.left=(minL-2)+'px';z.style.top=(minT-2)+'px';z.style.width=(maxR-minL+4)+'px';z.style.height=(maxB-minT+4)+'px';z.innerHTML='<span class="cpm-bracket-tag">Most expected to act</span>';mm.appendChild(z);});})();
+  drawCpmBracket('cpm');
   document.getElementById('co-back').addEventListener('click',function(){state.coView=null;renderCompanies();});
-  cbody.querySelectorAll('[data-cojump]').forEach(function(el){el.addEventListener('click',function(){selectCell(name,parseInt(el.getAttribute('data-cojump')));});});
+  cbody.querySelectorAll('[data-cojump2]').forEach(function(el){el.addEventListener('click',function(){var p=el.getAttribute('data-cojump2').split('|');selectCell(p[0],parseInt(p[1]));});});
 }
 
 function renderDocuments(){
@@ -1156,9 +1152,32 @@ function renderDocuments(){
   cbody.innerHTML=h;
 }
 
+function cpmMatrix(co,sector,gridId){
+  var vLev=[4,3,2,1,0], rLev=[4,3,2,1,0];
+  function vWord(v){return ['Not at all','Minimally','Moderately','Highly','Extremely'][v];}
+  function rWord(v){return ['Not at all','Minimally','Moderately','Highly','Primarily'][v];}
+  if(!co.actor)return '<div class="cp-ph-box">This company has no AI actor role assigned, so the responsibility lens is unavailable.</div>';
+  var bkt={};
+  idxAll().forEach(function(rr){var vv=vulnAt(sector,rr),aa=respAt(co.actor,rr);if(vv==null||aa==null)return;(bkt[vv+'|'+aa]=bkt[vv+'|'+aa]||[]).push(rr);});
+  var h='<div class="cpm" id="'+gridId+'" style="grid-template-columns:106px repeat(5,minmax(0,1fr));">';
+  h+='<div class="cpm-corner"></div>';
+  rLev.forEach(function(a){h+='<div class="cpm-colh cpm-l'+(a+1)+'">'+rWord(a)+'</div>';});
+  vLev.forEach(function(v){
+    h+='<div class="cpm-rowh cpm-l'+(v+1)+'">'+vWord(v)+'</div>';
+    rLev.forEach(function(a){
+      var rs=bkt[v+'|'+a]||[];
+      h+='<div class="cpm-cell'+((v>=3&&a>=3)?' cpm-hot':'')+'">'+rs.map(function(rr){var d=co.ack.indexOf(rr)!==-1;return '<span class="cpm-chip '+(d?'yes':'no')+'" data-cojump2="'+co.n+'|'+rr+'" title="'+escapeHtml(riskNums[rr]+' '+risks[rr])+(d?' — discloses':' — silent')+'">'+riskNums[rr]+'</span>';}).join('')+'</div>';
+    });
+  });
+  h+='</div>';
+  return h;
+}
+function drawCpmBracket(gridId){
+  var mm=document.getElementById(gridId);if(!mm)return;
+  requestAnimationFrame(function(){var hot=mm.querySelectorAll('.cpm-hot');if(!hot.length)return;var mr=mm.getBoundingClientRect(),minL=1e9,minT=1e9,maxR=-1e9,maxB=-1e9;hot.forEach(function(c){var r=c.getBoundingClientRect();minL=Math.min(minL,r.left-mr.left);minT=Math.min(minT,r.top-mr.top);maxR=Math.max(maxR,r.left-mr.left+r.width);maxB=Math.max(maxB,r.top-mr.top+r.height);});var z=document.createElement('div');z.className='cpm-bracket';z.style.left=(minL-2)+'px';z.style.top=(minT-2)+'px';z.style.width=(maxR-minL+4)+'px';z.style.height=(maxB-minT+4)+'px';z.innerHTML='<span class="cpm-bracket-tag">Most expected to act</span>';mm.appendChild(z);});
+}
 function renderCompare(){
   ctitle.textContent='';
-  var order=colOrder();
   var allSectors=Object.keys(sectorVuln);
   var allActors=[];(function(){var _s={};sectors.forEach(function(x){x.cos.forEach(function(c){if(c.actor)_s[c.actor]=1;});});allActors=Object.keys(_s).sort();})();
   var CAP=6;
@@ -1171,7 +1190,10 @@ function renderCompare(){
       pool.push({co:c,sector:s.name});
     });
   });
-  var h='<div class="page-hero">Compare</div><div class="cmp-intro">Line up to '+CAP+' companies side by side. Narrow the pool by sector or role, then pick the companies to compare.</div>';
+  // companies can only be compared within one sector + role; the first pick locks the peer group
+  var lock=null;
+  if(state.cmp.length){var lf=findCo(state.cmp[0]);if(lf)lock={sector:lf.sector,actor:lf.co.actor};}
+  var h='<div class="page-hero">Compare</div><div class="cmp-intro">Line up to '+CAP+' companies side by side, on the same vulnerability × responsibility grid. Companies must share a sector and role to be comparable, so once you pick the first, the pool narrows to its peers.</div>';
   // filter bar
   h+='<div class="cmp-filters">';
   h+='<div class="cmp-fgroup"><div class="cmp-flabel">Sector</div><div class="cmp-fchips">';
@@ -1183,7 +1205,7 @@ function renderCompare(){
   if(state.cmpSec.length||state.cmpActor.length)h+='<span class="cmp-clearf" id="cmp-clearf">Clear filters</span>';
   h+='</div>';
   // selection status
-  h+='<div class="cmp-status"><span>'+state.cmp.length+' of '+CAP+' selected</span>'+(state.cmp.length?'<span class="cmp-clearsel" id="cmp-clearsel">Clear selection</span>':'')+'</div>';
+  h+='<div class="cmp-status"><span>'+state.cmp.length+' of '+CAP+' selected'+(lock?' · comparing within <b>'+lock.sector+'</b> · <b>'+(lock.actor||'role n/a')+'</b>':'')+'</span>'+(state.cmp.length?'<span class="cmp-clearsel" id="cmp-clearsel">Clear selection</span>':'')+'</div>';
   // pool, grouped by sector
   var bySec={};pool.forEach(function(x){(bySec[x.sector]=bySec[x.sector]||[]).push(x.co);});
   h+='<div class="cmp-pool">';
@@ -1191,33 +1213,36 @@ function renderCompare(){
     h+='<div class="cmp-poolsec">'+sn+'</div><div class="cmp-pick">';
     bySec[sn].forEach(function(c){
       var on=state.cmp.indexOf(c.n)!==-1?' on':'';
+      var mismatch=lock&&on===''&&(sn!==lock.sector||c.actor!==lock.actor);
       var full=state.cmp.length>=CAP&&on==='';
-      h+='<span class="cmp-chip'+on+(full?' disabled':'')+'" data-pick="'+c.n+'">'+c.n+'<span class="cmp-chip-role">'+c.actor+'</span></span>';
+      var dis=(full||mismatch)?' disabled':'';
+      h+='<span class="cmp-chip'+on+dis+'" data-pick="'+c.n+'" title="'+(mismatch?'Different sector or role — clear the selection to compare a new peer group':escapeHtml(c.n))+'">'+c.n+'<span class="cmp-chip-role">'+c.actor+'</span></span>';
     });
     h+='</div>';
   });
   if(!pool.length)h+='<div class="detail-placeholder">No companies match these filters.</div>';
   h+='</div>';
-  // comparison grid
+  // comparison grids \u2014 each company on its own vulnerability \u00d7 responsibility matrix (peers share sector + role, so cells line up)
   if(state.cmp.length>=2){
     var picks=state.cmp.map(findCo);
-    h+='<div class="cmp-gridwrap"><div class="cmp-grid" style="grid-template-columns:170px repeat('+picks.length+',minmax(80px,1fr));">';
-    h+='<div class="cmp-corner"></div>';
-    picks.forEach(function(p){h+='<div class="cmp-co">'+p.co.n+'<span class="cmp-co-sec">'+p.sector+'</span></div>';});
-    order.forEach(function(r){
-      h+='<div class="cmp-rlabel" data-cmprisk="'+r+'" title="'+risks[r]+'">'+risks[r]+'</div>';
-      picks.forEach(function(p){var st=cellState(p.co,r);var g=(st==='hiack'||st==='loack')?'\u2713':(st==='hino'?'\u2715':'');h+='<div class="cmp-cell '+st+'" data-cmpcell="'+p.co.n+'|'+r+'">'+g+'</div>';});
+    h+='<div class="cmp-cpm-intro">Each company on its own vulnerability \u00d7 responsibility grid, the same view as its profile \u2014 rows are how vulnerable its sector is, columns how responsible its role is. A green chip means it discloses that risk, grey means silent, and the red corner marks the risks it is most expected to act on. Because these companies share a sector and role, every risk sits in the same cell across the grids: scan the same spot \u2014 green in one and grey in another is the difference.</div>';
+    h+='<div class="cmp-cpm-row">';
+    picks.forEach(function(p,i){
+      h+='<div class="cmp-cpm-card"><div class="cmp-cpm-head">'+p.co.n+'<span class="cmp-cpm-sub">'+p.sector+' \u00b7 '+(p.co.actor||'role n/a')+'</span></div>';
+      h+='<div class="cmp-cpm-axis">Responsibility \u2192</div>';
+      h+=cpmMatrix(p.co,p.sector,'cpmc'+i);
+      h+='</div>';
     });
-    h+='</div></div>';
+    h+='</div>';
   }else{h+='<div class="detail-placeholder">Select at least two companies to see them side by side.</div>';}
   cbody.innerHTML=h;
   cbody.querySelectorAll('[data-fsec]').forEach(function(el){el.addEventListener('click',function(){var sn=el.getAttribute('data-fsec');var i=state.cmpSec.indexOf(sn);if(i!==-1)state.cmpSec.splice(i,1);else state.cmpSec.push(sn);renderCompare();});});
   cbody.querySelectorAll('[data-factor]').forEach(function(el){el.addEventListener('click',function(){var a=el.getAttribute('data-factor');var i=state.cmpActor.indexOf(a);if(i!==-1)state.cmpActor.splice(i,1);else state.cmpActor.push(a);renderCompare();});});
   var cf=document.getElementById('cmp-clearf');if(cf)cf.addEventListener('click',function(){state.cmpSec=[];state.cmpActor=[];renderCompare();});
   var cs=document.getElementById('cmp-clearsel');if(cs)cs.addEventListener('click',function(){state.cmp=[];renderCompare();});
-  cbody.querySelectorAll('[data-pick]').forEach(function(el){el.addEventListener('click',function(){var n=el.getAttribute('data-pick');var i=state.cmp.indexOf(n);if(i!==-1)state.cmp.splice(i,1);else if(state.cmp.length<CAP)state.cmp.push(n);renderCompare();});});
-  cbody.querySelectorAll('[data-cmpcell]').forEach(function(el){el.addEventListener('click',function(){var p=el.getAttribute('data-cmpcell').split('|');selectCell(p[0],parseInt(p[1]));});});
-  cbody.querySelectorAll('[data-cmprisk]').forEach(function(el){el.addEventListener('click',function(){selectCol(parseInt(el.getAttribute('data-cmprisk')));});});
+  cbody.querySelectorAll('[data-pick]').forEach(function(el){el.addEventListener('click',function(){if(el.classList.contains('disabled'))return;var n=el.getAttribute('data-pick');var i=state.cmp.indexOf(n);if(i!==-1)state.cmp.splice(i,1);else if(state.cmp.length<CAP)state.cmp.push(n);renderCompare();});});
+  cbody.querySelectorAll('[data-cojump2]').forEach(function(el){el.addEventListener('click',function(){var p=el.getAttribute('data-cojump2').split('|');selectCell(p[0],parseInt(p[1]));});});
+  state.cmp.forEach(function(_,i){drawCpmBracket('cpmc'+i);});
 }
 
 function renderRiskView(r){
@@ -1472,7 +1497,7 @@ var tours={
   {sel:'#center-main',setup:function(){switchTab('companies');},title:'Companies: search and sort',body:'The <b>Companies</b> tab lists every organisation we reviewed, grouped by sector and sortable by how much each discloses. You can search for one by name, sector, or role.'},
   {sel:'#center-main',setup:function(){switchTab('companies');state.coView=A.company;renderCompanyProfile(A.company);},title:'A company in full',body:'Opening a company gives its full profile: its role in the AI ecosystem, a matrix of where its sector is most vulnerable and its role most responsible, the risks it acknowledges, and the source documents reviewed for it.'},
   {sel:'#center-main',setup:function(){switchTab('documents');},title:'Documents: the source material',body:'Every document we read sits in the <b>Documents</b> tab, grouped into ethics principles, governance principles, ESG reports and annual reports. This is where the disclosures come from, so you can go straight to the original.'},
-  {sel:'#center-main',setup:function(){switchTab('compare');},title:'Compare: firms side by side',body:'The <b>Compare</b> tab puts a handful of companies in columns next to each other, risk by risk, so you can see at a glance where one discloses and another stays silent. Narrow the pool by sector or role, then pick who to line up.'},
+  {sel:'#center-main',setup:function(){switchTab('compare');},title:'Compare: firms side by side',body:'The <b>Compare</b> tab lines up a handful of companies, each on its own vulnerability × responsibility grid, so you can see at a glance where one discloses a risk and another stays silent. Companies must share a sector and role to be comparable — narrow the pool, then pick who to line up.'},
   {sel:'#tabs-bar',setup:function(){switchTab('guide');},title:'That is the tour',body:'That is every view. The <b>About</b> tab explains the project and its method in full, and every underlined term has a definition on hover. From here, pick whichever view fits the question you came with.'}
  ],
  regulator:[
@@ -1494,7 +1519,7 @@ var tours={
   {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='Finance';state.expanded={};state.expanded['Finance']=true;renderMatrix();},title:'Expand to the individual firms',body:'Clicking the sector row opens the companies underneath it. Now each cell carries a tick where that firm discloses the risk and stays blank where it does not, so you can see at once which banks are ahead of you and which are behind.'},
   {sel:'#center-main',setup:function(){openSectorHeatmap('Finance');},title:'The Finance sector in full',body:'The <b>Sectors</b> tab gives the whole industry as one view: every risk down the side by expert vulnerability, each Finance company across the top with a tick where it discloses, and a summary of where the sector has gaps and which firms disclose the most. This is your peer group at a glance.'},
   {sel:'.cmp-pool',setup:function(){var b=[];sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1&&/bank/i.test(c.n);}).map(function(c){return c.n;});});if(b.length<3)sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1;}).map(function(c){return c.n;});});switchTab('compare');state.cmpSec=['Finance'];state.cmpActor=['AI Deployer'];state.cmp=b.slice(0,3);renderCompare();},title:'Pick your rivals to compare',body:'In <b>Compare</b> you first narrow the pool, here to the <b>Finance</b> sector and the <b>AI deployer</b> role, then pick the firms to line up. We have selected three banks; click any company to add or remove it, up to six at a time.'},
-  {sel:'.cmp-grid',setup:function(){var b=[];sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1&&/bank/i.test(c.n);}).map(function(c){return c.n;});});if(b.length<3)sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1;}).map(function(c){return c.n;});});switchTab('compare');state.cmpSec=['Finance'];state.cmpActor=['AI Deployer'];state.cmp=b.slice(0,3);renderCompare();},title:'Read the comparison across the risks',body:'Now the three banks sit side by side, one row per risk. Reading across a row, a green tick where a rival discloses and a blank where you stay silent is a gap to close, and the reverse is a strength to point to. Click any company header to open its full profile.'},
+  {sel:'.cmp-cpm-row',setup:function(){var b=[];sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1&&/bank/i.test(c.n);}).map(function(c){return c.n;});});if(b.length<3)sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1;}).map(function(c){return c.n;});});switchTab('compare');state.cmpSec=['Finance'];state.cmpActor=['AI Deployer'];state.cmp=b.slice(0,3);renderCompare();},title:'Read the comparison across the grids',body:'Now each bank sits on its own vulnerability × responsibility grid, the same view as its profile. Because these firms share a sector and role, every risk sits in the same cell across the grids — so scan the same spot: a green chip where a rival discloses and grey where you stay silent is a gap to close, and the reverse is a strength. The red corner is the risks each is most expected to act on. Click any chip for the underlying disclosure.'},
   {sel:'#center-main',setup:function(){var nm=null;sectors.forEach(function(s){if(s.name==='Finance'){var bk=s.cos.filter(function(c){return /bank/i.test(c.n);});nm=(bk[0]||s.cos[0]).n;}});switchTab('companies');state.coView=nm;renderCompanyProfile(nm);},title:'One rival in depth',body:'Opening any company gives its full profile: its role in the AI ecosystem, a matrix of where its sector is most vulnerable and its role most responsible, every risk it acknowledges, and the source documents reviewed for it. This is how you read a single competitor closely.'},
   {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';selectCol(A.risk);},title:'What mitigations others describe',body:'Open a single risk to see every firm that discloses it, and the sourced quote behind each cell. This is where you find the specific mitigations competitors talk about, the concrete examples worth bringing to a planning session.'},
   {sel:'#center-main',setup:function(){switchTab('documents');},title:'Read the source material',body:'Finally, the <b>Documents</b> tab collects competitors’ AI governance, ESG and annual reports in one place. When you need chapter and verse for an internal case, this is where you find what a rival actually committed to, in their own words.'}

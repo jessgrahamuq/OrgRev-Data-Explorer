@@ -89,17 +89,6 @@ body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--ink);font
 .tip:hover::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 6px);width:240px;background:var(--ink);color:#fff;font-size:11px;line-height:1.4;font-style:normal;font-weight:400;letter-spacing:0;text-transform:none;padding:9px 11px;border-radius:5px;z-index:50;white-space:normal;box-shadow:0 4px 14px rgba(0,0,0,0.18);}
 .tip:hover::before{content:'';position:absolute;left:14px;top:calc(100% + 1px);border:5px solid transparent;border-bottom-color:var(--ink);z-index:51;}
 .intro-overlay{position:fixed;inset:0;background:rgba(26,26,26,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px;}
-.chooser{position:fixed;inset:0;background:rgba(26,26,26,0.45);display:flex;align-items:center;justify-content:center;z-index:150;padding:24px;}
-.chooser-card{background:var(--card);border-radius:10px;max-width:460px;width:100%;padding:28px 30px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
-.chooser-title{font-size:19px;font-weight:600;margin-bottom:6px;}
-.chooser-sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
-.chooser-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
-.chooser-opt{border:1px solid var(--line);border-radius:7px;padding:12px 14px;cursor:pointer;transition:border-color 0.12s,background 0.12s;}
-.chooser-opt:hover{border-color:var(--ink);background:var(--bg);}
-.chooser-opt-name{font-size:14px;font-weight:600;}
-.chooser-opt-desc{font-size:12px;color:var(--muted);margin-top:2px;}
-.chooser-close{background:none;border:none;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 0;}
-.chooser-close:hover{color:var(--ink);}
 .tour{position:fixed;inset:0;z-index:200;pointer-events:none;}
 .tour-spot{position:absolute;border-radius:8px;box-shadow:0 0 0 9999px rgba(26,26,26,0.55);transition:all 0.35s cubic-bezier(.4,0,.2,1);pointer-events:none;border:2px solid #fff;}
 .tour-card{position:absolute;width:300px;background:var(--card);border-radius:10px;padding:18px 20px;box-shadow:0 14px 44px rgba(0,0,0,0.3);pointer-events:auto;transition:top 0.35s cubic-bezier(.4,0,.2,1),left 0.35s cubic-bezier(.4,0,.2,1);}
@@ -957,14 +946,6 @@ th.mxv-empty-l{border-left:1px solid #fff;}  /* hide the table's left frame edge
     <button type="submit" class="lock-btn" id="lock-btn">Unlock</button>
     <div class="lock-err" id="lock-err"></div>
   </form>
-</div>
-<div id="tour-chooser" class="chooser" style="display:none;">
-  <div class="chooser-card">
-    <div class="chooser-title">Choose a walkthrough</div>
-    <div class="chooser-sub">Pick the role closest to yours, or take the general tour.</div>
-    <div class="chooser-list" id="chooser-list"></div>
-    <button class="chooser-close" id="chooser-close">Maybe later</button>
-  </div>
 </div>
 <div id="tour" class="tour" style="display:none;">
   <div class="tour-spot" id="tour-spot"></div>
@@ -2851,7 +2832,7 @@ function renderGuide(){
 
   h+='</div>';
   cbody.innerHTML=h;
-  var gtb=document.getElementById('guide-tour-btn');if(gtb)gtb.addEventListener('click',showTourChooser);
+  var gtb=document.getElementById('guide-tour-btn');if(gtb)gtb.addEventListener('click',startTour);
   cbody.querySelectorAll('[data-go]').forEach(function(el){el.addEventListener('click',function(){
     var g=el.getAttribute('data-go');
     if(g==='matrix'){switchTab('matrix');}
@@ -2882,7 +2863,7 @@ function gapCellSel(){var g=findGapCell();return g?('[data-seccell="'+g.sn+'|'+g
 function financeCellSel(){var sn='Finance';var v=sectorVuln[sn];if(!v)return gapCellSel();var best=null;idxAll().forEach(function(r){var vv=v[r],c=sectorCoverage(sn,r);if(vv!=null&&vv>=3&&(c===null||c===0)){if(!best||vv>best.v)best={r:r,v:vv};}});if(!best)idxAll().forEach(function(r){var vv=v[r];if(vv!=null&&(!best||vv>best.v))best={r:r,v:vv};});return best?('[data-seccell="Finance|'+best.r+'"]'):'#center-main';}
 var tours={
  general:[
-  {sel:'#tabs-bar',setup:function(){switchTab('matrix');},title:'Five views, one dataset',body:'The pills along the top switch between the views. <b>Home</b> is the master matrix of every company against every risk. <b>Sectors</b> profiles each industry. <b>Risks</b> is the full taxonomy of the twenty-four risks. <b>Companies</b> lists every organisation we reviewed. <b>Documents</b> gathers all the source material by type. <b>Compare</b> sets a few of them side by side. We will walk through each of them in turn.'},
+  {sel:'#tabs-bar',setup:function(){switchTab('matrix');},title:'One dataset, several views',body:'The pills along the top switch between the views. <b>Home</b> is the master matrix of every company against every risk. <b>Sectors</b> profiles each industry. <b>Risks</b> is the full taxonomy of the twenty-four risks. <b>Companies</b> lists every organisation we reviewed. <b>Documents</b> gathers all the source material by type. <b>Mitigations</b> shows what companies say they do about AI risks. <b>Compare</b> sets a few companies side by side. We will walk through each of them in turn.'},
   {sel:'#center-main',setup:function(){switchTab('matrix');},title:'Home: companies against risks',body:'Every row is a sector and every column is one of the twenty-four AI risks. Reading down a column tells you how widely a risk is disclosed across the whole economy. Reading across a row tells you how a single sector is responding to all of the risks at once.'},
   {sel:'.mx-legend',setup:function(){switchTab('matrix');},title:'How to read a cell',body:'The colour of each cell is how vulnerable experts judge that sector to that risk, running from deep red for extremely vulnerable through to blue for not at all. The number inside is the share of companies in that sector that actually disclose the risk. When no company discloses it, the cell shows a dash in place of a number.'},
   {sel:gapCellSel,setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Zoom in on a gap',body:'This is the kind of cell that is worth stopping on. It is deep red, so experts consider the sector highly vulnerable to this risk. Yet it shows only a dash, which means not a single company in the sector says anything about it. High stakes paired with complete silence is the clearest sign of a blind spot, and it is precisely the pattern this tool is built to surface.'},
@@ -2894,48 +2875,15 @@ var tours={
   {sel:'#center-main',setup:function(){switchTab('companies');},title:'Companies: search and sort',body:'The <b>Companies</b> tab lists every organisation we reviewed, grouped by sector and sortable by how much each discloses. You can search for one by name, sector, or role.'},
   {sel:'#center-main',setup:function(){switchTab('companies');state.coView=A.company;renderCompanyProfile(A.company);},title:'A company in full',body:'Opening a company gives its full profile: its role in the AI ecosystem, a matrix of where its sector is most vulnerable and its role most responsible, the risks it acknowledges, and the source documents reviewed for it.'},
   {sel:'#center-main',setup:function(){switchTab('documents');},title:'Documents: the source material',body:'Every document we read sits in the <b>Documents</b> tab, grouped into ethics principles, governance principles, ESG reports and annual reports. This is where the disclosures come from, so you can go straight to the original.'},
+  {sel:'#center-main',setup:function(){switchTab('mitigations');},title:'Mitigations: what companies say they do',body:'The <b>Mitigations</b> tab shows which kinds of mitigations companies describe in their public documents, organised by the mitigation taxonomy. Open a category to see its specific mitigation types, the companies that describe them, and the extracts behind each. It is descriptive: it records what companies say, not whether the measures are in place or effective.'},
   {sel:'#center-main',setup:function(){switchTab('compare');},title:'Compare: firms side by side',body:'The <b>Compare</b> tab lines up a handful of companies, each on its own vulnerability × responsibility grid, so you can see at a glance where one discloses a risk and another stays silent. Companies must share a sector and role to be comparable — narrow the pool, then pick who to line up.'},
   {sel:'#tabs-bar',setup:function(){switchTab('guide');},title:'That is the tour',body:'That is every view. The <b>About</b> tab explains the project and its method in full, and every underlined term has a definition on hover. From here, pick whichever view fits the question you came with.'}
  ],
- regulator:[
-  {sel:'#tabs-bar',setup:function(){switchTab('matrix');},title:'The views you will use',body:'As a regulator of a sector or activity you want to target your effort where it counts. We will start on <b>Home</b> to get the lie of the land, open the specific <b>risk</b> you oversee, read who is doing the most and the least, and finish in the <b>Documents</b>. An online-safety commissioner, worried about toxic content and discrimination, is our running example.'},
-  {sel:'.sitebar',setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Your goal',body:'Say you are an online-safety commissioner. You want to see which companies are doing the most, and the least, on the risks you oversee, so you can decide who to talk to and what to hold up as good practice.'},
-  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Start on Home',body:'Home is the whole field at once: every sector down the side, all twenty-four risks across the top. Before narrowing to your own risks it is worth reading the shape of it. The colour of a cell is how vulnerable experts judge that sector to that risk, and the number is the share of that sector that discloses it.'},
-  {sel:'.mx-legend',setup:function(){switchTab('matrix');},title:'Find your risks in the columns',body:'Run along the top row of risk numbers to the ones you oversee. For a commissioner that is exposure to toxic content and unfair discrimination. Reading straight down those columns shows, sector by sector, how exposed each one is and how much it actually says.'},
-  {sel:gapCellSel,setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Zoom in on a silent cell',body:'This is the kind of cell to stop on. It is deep red, so the sector is judged highly vulnerable, yet it shows only a dash: not one company there discloses the risk. High exposure paired with total silence is the clearest blind spot, and exactly what a regulator wants to find.'},
-  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';selectCol(A.risk);},title:'Open the risk itself',body:'Clicking a risk column header opens that one risk on its own. Sectors run down the side by how vulnerable they are, the roles most responsible for acting run across the top, and each cell is shaded by how many companies disclose. This is where the apparent state of the art shows itself.'},
-  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';selectCol(A.risk);},title:'The corner most expected to act',body:'The red bracket marks where the most vulnerable sectors meet the most responsible roles. Click any cell inside it to see the individual companies behind it and whether each one discloses. Those firms are the ones setting the standard, or conspicuously not.'},
-  {sel:'#center-main',setup:function(){switchTab('documents');},title:'Go and read what they say',body:'Once you know which companies set the standard, the <b>Documents</b> tab gathers their actual source material, grouped by type. This is where a commissioner stops taking claims on trust and reads the AI governance and ESG documents first-hand.'}
- ],
- corporate:[
-  {sel:'#tabs-bar',setup:function(){switchTab('matrix');},title:'The views you will use',body:'As an AI risk staffer you are benchmarking your own organisation against its peers. We will start on <b>Home</b>, filter to your <b>sector</b>, expand it to see the individual firms, line the relevant ones up in <b>Compare</b>, then read what competitors say in the <b>Documents</b>. A bank in the Finance sector is our running example.'},
-  {sel:'.sitebar',setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Your goal',body:'You want to see where your company ranks against competitors, particularly inside your own sector, so you can argue internally for doing more, or show that you are already doing well. You also want to see which mitigations others describe, so you can raise them when the team plans.'},
-  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';renderMatrix();},title:'Start on Home',body:'Home puts every company against every risk, grouped by sector. Before zeroing in, read the Finance row: the colours show how vulnerable experts judge the sector to each risk, and the numbers show how much of the sector actually discloses.'},
-  {sel:'#left-panel',setup:function(){switchTab('matrix');state.sector='Finance';var _fs=document.getElementById('f-sector');if(_fs)_fs.value='Finance';renderMatrix();},title:'Filter to your sector',body:'Narrowing to Finance in the filters fixes the peer group and re-sorts the risks to the ones experts consider most pressing for banks. Every comparison from here is against the firms you are actually measured against.'},
-  {sel:financeCellSel,setup:function(){switchTab('matrix');state.sector='Finance';renderMatrix();},title:'Zoom in on a cell',body:'Zoom into a risk where Finance is highly exposed. The cell colour is the sector’s vulnerability and the number is how much of the sector discloses. A red cell with a low number is a risk your industry takes seriously in principle but says little about in public.'},
-  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='Finance';state.expanded={};state.expanded['Finance']=true;renderMatrix();},title:'Expand to the individual firms',body:'Clicking the sector row opens the companies underneath it. Now each cell carries a tick where that firm discloses the risk and stays blank where it does not, so you can see at once which banks are ahead of you and which are behind.'},
-  {sel:'#center-main',setup:function(){openSectorHeatmap('Finance');},title:'The Finance sector in full',body:'The <b>Sectors</b> tab gives the whole industry as one view: every risk down the side by expert vulnerability, each Finance company across the top with a tick where it discloses, and a summary of where the sector has gaps and which firms disclose the most. This is your peer group at a glance.'},
-  {sel:'.cmp-pool',setup:function(){var b=[];sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1&&/bank/i.test(c.n);}).map(function(c){return c.n;});});if(b.length<3)sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1;}).map(function(c){return c.n;});});switchTab('compare');state.cmpSec=['Finance'];state.cmpActor=['AI Deployer'];state.cmp=b.slice(0,3);renderCompare();},title:'Pick your rivals to compare',body:'In <b>Compare</b> you first narrow the pool, here to the <b>Finance</b> sector and the <b>AI deployer</b> role, then pick the firms to line up. We have selected three banks; click any company to add or remove it, up to six at a time.'},
-  {sel:'.cmp-tick',setup:function(){var b=[];sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1&&/bank/i.test(c.n);}).map(function(c){return c.n;});});if(b.length<3)sectors.forEach(function(s){if(s.name==='Finance')b=s.cos.filter(function(c){return (c.actor||'').indexOf('Deployer')!==-1;}).map(function(c){return c.n;});});switchTab('compare');state.cmpSec=['Finance'];state.cmpActor=['AI Deployer'];state.cmp=b.slice(0,3);renderCompare();},title:'Read the comparison grid',body:'The banks now line up as columns and the 24 risks as rows, ordered by severity. A green check means that company discloses the risk; a dot means it stays silent. Scan across a row to see who acknowledges a risk and who does not, and read the total at the foot of each column. Click a company to open its full profile, or a risk to see it in depth.'},
-  {sel:'#center-main',setup:function(){var nm=null;sectors.forEach(function(s){if(s.name==='Finance'){var bk=s.cos.filter(function(c){return /bank/i.test(c.n);});nm=(bk[0]||s.cos[0]).n;}});switchTab('companies');state.coView=nm;renderCompanyProfile(nm);},title:'One rival in depth',body:'Opening any company gives its full profile: its role in the AI ecosystem, a matrix of where its sector is most vulnerable and its role most responsible, every risk it acknowledges, and the source documents reviewed for it. This is how you read a single competitor closely.'},
-  {sel:'#center-main',setup:function(){switchTab('matrix');state.sector='All';selectCol(A.risk);},title:'What mitigations others describe',body:'Open a single risk to see every firm that discloses it, and the sourced quote behind each cell. This is where you find the specific mitigations competitors talk about, the concrete examples worth bringing to a planning session.'},
-  {sel:'#center-main',setup:function(){switchTab('documents');},title:'Read the source material',body:'Finally, the <b>Documents</b> tab collects competitors’ AI governance, ESG and annual reports in one place. When you need chapter and verse for an internal case, this is where you find what a rival actually committed to, in their own words.'}
- ],
-};
-var tourMeta={
- general:{name:'General tour',desc:'How the whole tool fits together'},
- regulator:{name:'Sector-based regulator',desc:'See who is doing the most and least on a risk you oversee'},
- corporate:{name:'Corporate AI risk staffer',desc:'Benchmark your company against sector peers'},
 };
 var tourSteps=tours.general;
 var tourI=0;
 var tourEl={root:document.getElementById('tour'),spot:document.getElementById('tour-spot'),card:document.getElementById('tour-card'),n:document.getElementById('tour-stepn'),t:document.getElementById('tour-title'),b:document.getElementById('tour-body'),back:document.getElementById('tour-back'),next:document.getElementById('tour-next'),skip:document.getElementById('tour-skip')};
-function startTour(track){tourSteps=tours[track]||tours.general;tourI=0;tourEl.root.style.display='block';showTourStep();}
-function showTourChooser(){
-  var ov=document.getElementById('tour-chooser');
-  ov.style.display='flex';
-}
-function hideTourChooser(){document.getElementById('tour-chooser').style.display='none';}
+function startTour(){tourSteps=tours.general;tourI=0;tourEl.root.style.display='block';showTourStep();}
 function endTour(){tourEl.root.style.display='none';}
 function showTourStep(){
   var step=tourSteps[tourI];
@@ -2972,18 +2920,7 @@ tourEl.back.addEventListener('click',function(){if(tourI>0){tourI--;showTourStep
 tourEl.skip.addEventListener('click',function(){endTour();switchTab('matrix');});
 window.addEventListener('resize',function(){if(tourEl.root.style.display==='block')showTourStep();});
 
-// populate tour chooser
-(function(){
-  var list=document.getElementById('chooser-list');
-  var html='';
-  Object.keys(tourMeta).forEach(function(k){
-    html+='<div class="chooser-opt" data-track="'+k+'"><div class="chooser-opt-name">'+tourMeta[k].name+'</div><div class="chooser-opt-desc">'+tourMeta[k].desc+'</div></div>';
-  });
-  list.innerHTML=html;
-  list.querySelectorAll('[data-track]').forEach(function(el){el.addEventListener('click',function(){hideTourChooser();startTour(el.getAttribute('data-track'));});});
-})();
-document.getElementById('chooser-close').addEventListener('click',hideTourChooser);
-document.getElementById('intro-tour').addEventListener('click',function(){document.getElementById('intro-overlay').style.display='none';showTourChooser();});
+document.getElementById('intro-tour').addEventListener('click',function(){document.getElementById('intro-overlay').style.display='none';startTour();});
 document.getElementById('intro-start').addEventListener('click',function(){document.getElementById('intro-overlay').style.display='none';});
 document.getElementById('intro-guide').addEventListener('click',function(){document.getElementById('intro-overlay').style.display='none';switchTab('guide');});
 // ---------- Data load (./data.json, generated at build time) ----------
